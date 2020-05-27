@@ -17,8 +17,34 @@ let server = new opcua.OPCUAServer({
 server.initialize(() => {
     console.log("OPC UA server initialized");
 
-    //build_my_address_space(server);
-    //console.log("Address Space inizilialzed");
+    function build_my_address_space(server){
+        const addressSpace = server.engine.addressSpace;
+        const namespace = addressSpace.getOwnNamespace();
+
+        //declare a new object
+        let device = namespace.addObject({
+            organizedBy: addressSpace.rootFolder.objects,
+            browseName: "MyDevice"
+        })
+
+        namespace.addVariable({
+            propertyOf: device,
+            browseName: "CPU_Architecture",
+            dataType: "String",
+            value: {
+                get: function() {
+                    return new opcua.Variant({
+                        dataType: opcua.DataType.String,
+                        value: process.arch
+                    });
+                }
+            }
+        });
+
+    }
+
+    build_my_address_space(server);
+    console.log("Address space initialized");
 
     server.start(() => {
         console.log("server ascolta");
