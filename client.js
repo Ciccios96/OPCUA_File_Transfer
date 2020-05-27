@@ -62,7 +62,7 @@ async.series([
 
     // step 4 : read a variable with readVariableValue
     function(callback) {
-       the_session.readVariableValue("ns=1;s=free_memory", function(err, dataValue) {
+       the_session.readVariableValue("ns=0;s=free_memory", function(err, dataValue) {
          if (!err) {
            console.log(" free mem % = ", dataValue.toString());
          }
