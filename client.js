@@ -49,9 +49,9 @@ async.series([
 
     // step 3 : browse
     function(callback) {
-       the_session.browse("RootFolder", function(err, browseResult) {
+       the_session.browse("ns=1;i=1000", function(err, browseResult) {
          if (!err) {
-           console.log("Browsing rootfolder: ");
+           console.log("Browsing objects: ");
            for (let reference of browseResult.references) {
              console.log(reference.browseName.toString(), reference.nodeId.toString());
            }
