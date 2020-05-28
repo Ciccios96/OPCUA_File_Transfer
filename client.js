@@ -3,7 +3,7 @@ const opcua = require("node-opcua");
 const async = require("async");
 
 // const endpointUrl = "opc.tcp://<hostname>:4334/UA/MyLittleServer";
-const endpointUrl = "opc.tcp://ciccio-Lenovo-IdeaPad-S145-15AST:4334/UA/TransferServer";
+const endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
 const client = opcua.OPCUAClient.create({
     endpoint_must_exist: false
 });
@@ -62,9 +62,9 @@ async.series([
 
     // step 4 : read a variable with readVariableValue
     function(callback) {
-       the_session.readVariableValue("ns=0;s=free_memory", function(err, dataValue) {
+       the_session.readVariableValue("ns=1;b=1020FFAA", function(err, dataValue) {
          if (!err) {
-           console.log(" free mem % = ", dataValue.toString());
+           console.log(" variable 2 = ", dataValue.toString());
          }
          callback(err);
        });
@@ -74,13 +74,13 @@ async.series([
     function(callback) {
        const maxAge = 0;
        const nodeToRead = {
-         nodeId: "ns=1;s=free_memory",
+         nodeId: "ns=1;i=1001",
          attributeId: opcua.AttributeIds.Value
        };
        
        the_session.read(nodeToRead, maxAge, function(err, dataValue) {
          if (!err) {
-           console.log(" free mem % = ", dataValue.toString());
+           console.log(" var 1 = ", dataValue.toString());
          }
          callback(err);
        });
