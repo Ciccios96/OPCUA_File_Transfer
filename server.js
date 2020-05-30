@@ -1,5 +1,8 @@
 /*global require,setInterval,console */
 const opcua = require("node-opcua");
+const util = require("util");
+const fs = require("fs");
+const file_transfer = require("node-opcua-file-transfer");
 
 // Let's create an instance of OPCUAServer
 const server = new opcua.OPCUAServer({
@@ -14,17 +17,32 @@ const server = new opcua.OPCUAServer({
 
 function post_initialize() {
     console.log("initialized");
+
     function construct_my_address_space(server) {
+
+        const my_data_filename = "/file.txt";
     
         const addressSpace = server.engine.addressSpace;
         const namespace = addressSpace.getOwnNamespace();
+
+        const fileType = addressSpace.findObjectType("FileType");
+
+        const myFile = fileType.instantiate({
+            nodeId: "s=MyFile",
+            browseName: "MyFile",
+            organizedBy: addressSpace.rootFolder.objects
+        })
+
+        file_transfer.installFileType(myFile, { 
+            filename: my_data_filename
+        });
     
         // declare a new object
         const device = namespace.addObject({
             organizedBy: addressSpace.rootFolder.objects,
             browseName: "MyDevice"
         });
-    
+
         // add some variables
         // add a variable named MyVariable1 to the newly created folder "MyDevice"
         let variable1 = 1;
@@ -66,6 +84,7 @@ function post_initialize() {
                 }
             }
         });
+
         const os = require("os");
         /**
          * returns the percentage of free memory on the running machine
@@ -76,6 +95,7 @@ function post_initialize() {
             const percentageMemUsed = os.freemem() / os.totalmem() * 100.0;
             return percentageMemUsed;
         }
+
         namespace.addVariable({
         
             componentOf: device,
@@ -87,6 +107,7 @@ function post_initialize() {
                 get: function () {return new opcua.Variant({dataType: opcua.DataType.Double, value: available_memory() });}
             }
         });
+
     }
     construct_my_address_space(server);
     server.start(function() {
@@ -95,5 +116,7 @@ function post_initialize() {
         const endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl;
         console.log(" the primary server endpoint url is ", endpointUrl );
     });
+
+
 }
 server.initialize(post_initialize);

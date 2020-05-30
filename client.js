@@ -1,6 +1,7 @@
 /*global require,console,setTimeout */
 const opcua = require("node-opcua");
 const async = require("async");
+const file_transfer = require("node-opcua-file-transfer");
 
 // const endpointUrl = "opc.tcp://<hostname>:4334/UA/MyLittleServer";
 const endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
@@ -84,6 +85,21 @@ async.series([
          }
          callback(err);
        });
+    },
+
+    function(callback){
+      new file_transfer.ClientFile(the_session,"ns1;s=MyFile",function(err,clientfile){
+        if(err){
+          return callback(err);
+        }
+        the_clientfile = clientfile;
+        callback();
+      });
+      //const mode = file_transfer.OpenFileMode.ReadWriteAppend;
+      //clientFile.open(mode);
+      //const size = await clientFile.size();
+      //console.log("il file è grande = " ,size,"bytes");
+      //await clientFile.close(mode);
     },
 
     // step 5: install a subscription and install a monitored item for 10 seconds
