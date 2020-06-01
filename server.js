@@ -24,89 +24,40 @@ function post_initialize() {
     
         const addressSpace = server.engine.addressSpace;
         const namespace = addressSpace.getOwnNamespace();
+        
+        //creazione folders
 
+        const FileSystem = namespace.addFolder(addressSpace.rootFolder,{
+            browseName: "FileSystem"
+        }); 
+
+        const Documents = namespace.addFolder(FileSystem,{
+            browseName: "Documents"
+        });
+
+        //instanzio il fileType
         const fileType = addressSpace.findObjectType("FileType");
 
+        //creo i vari nodi filetype
         const myFile = fileType.instantiate({
             nodeId: "s=MyFile",
             browseName: "MyFile",
-            organizedBy: addressSpace.rootFolder.objects
+            organizedBy: FileSystem
         })
 
         file_transfer.installFileType(myFile, { 
             filename: my_data_filename
         });
-    
-        // declare a new object
-        const device = namespace.addObject({
-            organizedBy: addressSpace.rootFolder.objects,
-            browseName: "MyDevice"
-        });
 
-        // add some variables
-        // add a variable named MyVariable1 to the newly created folder "MyDevice"
-        let variable1 = 1;
-        
-        // emulate variable1 changing every 500 ms
-        setInterval(function(){  variable1+=1; }, 500);
-        
-        namespace.addVariable({
-            componentOf: device,
-            browseName: "MyVariable1",
-            dataType: "Double",
-            value: {
-                get: function () {
-                    return new opcua.Variant({dataType: opcua.DataType.Double, value: variable1 });
-                }
-            }
-        });
-        
-        // add a variable named MyVariable2 to the newly created folder "MyDevice"
-        let variable2 = 10.0;
-        
-        namespace.addVariable({
-        
-            componentOf: device,
-        
-            nodeId: "ns=1;b=1020FFAA", // some opaque NodeId in namespace 4
-        
-            browseName: "MyVariable2",
-        
-            dataType: "Double",    
-        
-            value: {
-                get: function () {
-                    return new opcua.Variant({dataType: opcua.DataType.Double, value: variable2 });
-                },
-                set: function (variant) {
-                    variable2 = parseFloat(variant.value);
-                    return opcua.StatusCodes.Good;
-                }
-            }
-        });
+        const myFile2 = fileType.instantiate({
+            nodeId: "s=Document_File",
+            browseName: "Document_File",
+            organizedBy: Documents
+        })
 
-        const os = require("os");
-        /**
-         * returns the percentage of free memory on the running machine
-         * @return {double}
-         */
-        function available_memory() {
-            // var value = process.memoryUsage().heapUsed / 1000000;
-            const percentageMemUsed = os.freemem() / os.totalmem() * 100.0;
-            return percentageMemUsed;
-        }
-
-        namespace.addVariable({
-        
-            componentOf: device,
-        
-            nodeId: "s=free_memory", // a string nodeID
-            browseName: "FreeMemory",
-            dataType: "Double",    
-            value: {
-                get: function () {return new opcua.Variant({dataType: opcua.DataType.Double, value: available_memory() });}
-            }
-        });
+        file_transfer.installFileType(myFile2, { 
+            filename: my_data_filename
+        });         
 
     }
     construct_my_address_space(server);
