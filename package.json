@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "inquirer": "^7.1.0",
     "node-opcua": "^2.5.12",
     "node-opcua-file-transfer": "^2.5.12"
   }
