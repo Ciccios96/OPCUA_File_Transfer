@@ -38,6 +38,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var node_opcua_1 = require("node-opcua");
 var node_opcua_file_transfer_1 = require("node-opcua-file-transfer");
+var util_1 = require("util");
+var fs = require("fs");
+var readline = require("readline");
+var rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 var connectionStrategy = {
     initialDelay: 1000,
     maxRetry: 1
@@ -54,11 +61,11 @@ var client = node_opcua_1.OPCUAClient.create(options);
 var endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var session, browseResult, _i, _a, reference, fileNodeId, clientFile, mode, size, err_1;
+        var session, browseResult, _i, _a, reference, fileNodeId, clientFile, mode, data, my_data_filename, size, err_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    _b.trys.push([0, 9, , 10]);
+                    _b.trys.push([0, 13, , 14]);
                     // step 1 : connect to
                     return [4 /*yield*/, client.connect(endpointUrl)];
                 case 1:
@@ -69,10 +76,18 @@ function main() {
                 case 2:
                     session = _b.sent();
                     console.log("Session created!");
-                    return [4 /*yield*/, session.browse("RootFolder")];
+                    // step 3 : browse
+                    return [4 /*yield*/, rl.question("inserisci qualcosa ", function (answer) {
+                            console.log(answer);
+                            rl.close();
+                        })];
                 case 3:
+                    // step 3 : browse
+                    _b.sent();
+                    return [4 /*yield*/, session.browse("ns=1;i=1000")];
+                case 4:
                     browseResult = _b.sent();
-                    console.log("References of RootFolder :");
+                    console.log("References of FileSystem :");
                     for (_i = 0, _a = browseResult.references; _i < _a.length; _i++) {
                         reference = _a[_i];
                         console.log("   -> ", reference.browseName.toString());
@@ -81,34 +96,45 @@ function main() {
                     clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
                     mode = node_opcua_file_transfer_1.OpenFileMode.ReadWriteAppend;
                     return [4 /*yield*/, clientFile.open(mode)];
-                case 4:
+                case 5:
+                    _b.sent();
+                    return [4 /*yield*/, clientFile.setPosition([0, 1])];
+                case 6:
+                    _b.sent();
+                    return [4 /*yield*/, clientFile.read(20)];
+                case 7:
+                    data = _b.sent();
+                    console.log("Contenuto del file: ", data.toString("utf-8"));
+                    my_data_filename = "./downloads/someFile.txt";
+                    return [4 /*yield*/, util_1.promisify(fs.writeFile)(my_data_filename, data.toString("utf-8"), "utf8")];
+                case 8:
                     _b.sent();
                     return [4 /*yield*/, clientFile.size()];
-                case 5:
+                case 9:
                     size = _b.sent();
                     console.log("The current file size is : ", size, " bytes");
                     // don't forget to close the file when done
                     return [4 /*yield*/, clientFile.close()];
-                case 6:
+                case 10:
                     // don't forget to close the file when done
                     _b.sent();
                     // close session
                     return [4 /*yield*/, session.close()];
-                case 7:
+                case 11:
                     // close session
                     _b.sent();
                     // disconnecting
                     return [4 /*yield*/, client.disconnect()];
-                case 8:
+                case 12:
                     // disconnecting
                     _b.sent();
                     console.log("Done!");
-                    return [3 /*break*/, 10];
-                case 9:
+                    return [3 /*break*/, 14];
+                case 13:
                     err_1 = _b.sent();
                     console.log("An error has occured : ", err_1);
-                    return [3 /*break*/, 10];
-                case 10: return [2 /*return*/];
+                    return [3 /*break*/, 14];
+                case 14: return [2 /*return*/];
             }
         });
     });

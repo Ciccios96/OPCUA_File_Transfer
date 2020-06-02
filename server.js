@@ -20,7 +20,7 @@ function post_initialize() {
 
     function construct_my_address_space(server) {
 
-        const my_data_filename = "/file.txt";
+        const my_data_filename = "./server_files/file.txt";
     
         const addressSpace = server.engine.addressSpace;
         const namespace = addressSpace.getOwnNamespace();

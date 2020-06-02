@@ -1,18 +1,19 @@
 import {
     OPCUAClient,
     MessageSecurityMode, SecurityPolicy,
-    AttributeIds,
-    makeBrowsePath,
-    ClientSubscription,
-    TimestampsToReturn,
-    MonitoringParametersOptions,
-    ReadValueIdLike,
-    ClientMonitoredItem,
-    DataValue,
     NodeId,
-    NodeIdType
+    NodeIdType,
+    randomInt16
 } from "node-opcua";
 import { ClientFile, OpenFileMode } from "node-opcua-file-transfer";
+import {promisify} from "util";
+const fs = require("fs");
+const readline = require("readline");
+
+var rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
  
 const connectionStrategy = {
     initialDelay: 1000,
@@ -40,9 +41,13 @@ async function main() {
         console.log("Session created!");
  
     // step 3 : browse
-        const browseResult = await session.browse("RootFolder");
+        await rl.question("inserisci qualcosa ",(answer)=>{
+            console.log(answer);
+            rl.close();
+        });
+        const browseResult = await session.browse("ns=1;i=1000");
      
-        console.log("References of RootFolder :");
+        console.log("References of FileSystem :");
         for(const reference of browseResult.references) {
             console.log( "   -> ", reference.browseName.toString());
         }
@@ -54,6 +59,13 @@ async function main() {
     // let's open the file
         const mode = OpenFileMode.ReadWriteAppend;
         await clientFile.open(mode);
+
+        await clientFile.setPosition([0,1]);
+        const data: Buffer = await clientFile.read(20);
+        console.log("Contenuto del file: ", data.toString("utf-8"));
+
+        const my_data_filename = "./downloads/someFile.txt";
+        await promisify(fs.writeFile)(my_data_filename, data.toString("utf-8"), "utf8");
 
         const size = await clientFile.size();
         console.log("The current file size is : ", size, " bytes");
