@@ -10,10 +10,10 @@ import {promisify} from "util";
 const fs = require("fs");
 const readline = require("readline");
 
-var rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
+//var rl = readline.createInterface({
+//    input: process.stdin,
+//    output: process.stdout
+//  });
  
 const connectionStrategy = {
     initialDelay: 1000,
@@ -33,54 +33,97 @@ const endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittle
 async function main() {
     try {
     // step 1 : connect to
-        await client.connect(endpointUrl);
-        console.log("Client connected!");
+        await connect(endpointUrl);
  
     // step 2 : createSession
-        const session = await client.createSession();
-        console.log("Session created!");
+        const session = await create_session();
  
     // step 3 : browse
-        await rl.question("inserisci qualcosa ",(answer)=>{
-            console.log(answer);
-            rl.close();
-        });
-        const browseResult = await session.browse("ns=1;i=1000");
-     
-        console.log("References of FileSystem :");
-        for(const reference of browseResult.references) {
-            console.log( "   -> ", reference.browseName.toString());
-        }
+        await browse(session);
 
-    // step 4 : read a variable with readVariableValue
-        const fileNodeId = new NodeId(NodeIdType.STRING, "MyFile", 1);
-        const clientFile = new ClientFile(session, fileNodeId);
+    // step 4 : read a NodeId
+        const clientFile = await read_node(session);
 
-    // let's open the file
-        const mode = OpenFileMode.ReadWriteAppend;
-        await clientFile.open(mode);
+    // operations on file
+        await open_file(clientFile);
 
-        await clientFile.setPosition([0,1]);
-        const data: Buffer = await clientFile.read(20);
-        console.log("Contenuto del file: ", data.toString("utf-8"));
+        const data = await read_file(clientFile);
 
-        const my_data_filename = "./downloads/someFile.txt";
-        await promisify(fs.writeFile)(my_data_filename, data.toString("utf-8"), "utf8");
+        await download_file(data);
 
-        const size = await clientFile.size();
-        console.log("The current file size is : ", size, " bytes");
+        await size_file(clientFile);
 
-        // don't forget to close the file when done
-        await clientFile.close();
+        await write_file(clientFile);
 
-    // close session
-        await session.close();
- 
-    // disconnecting
-        await client.disconnect();
-        console.log("Done!");
+    // closing file, session and connection
+        await ending(clientFile,session);
+
     } catch(err) {
         console.log("An error has occured : ",err);
     }
 }
 main();
+
+async function connect(endpoint){
+    await client.connect(endpoint);
+    console.log("Client connected!");
+}
+
+async function create_session(){
+    const session = await client.createSession();
+    console.log("Session created!");
+    return session;
+}
+
+async function browse(session){
+    const browseResult = await session.browse("ns=1;i=1000");
+     
+    console.log("References of FileSystem :");
+    for(const reference of browseResult.references) {
+        console.log( "   -> ", reference.browseName.toString());
+    }
+}
+
+async function read_node(session){
+    const fileNodeId = new NodeId(NodeIdType.STRING, "MyFile", 1);
+    const clientFile = new ClientFile(session, fileNodeId);
+    return clientFile;
+}
+
+async function open_file(clientFile){
+    const mode = OpenFileMode.ReadWriteAppend;
+    await clientFile.open(mode);
+}
+
+async function read_file(clientFile){
+    await clientFile.setPosition(0);
+    const data: Buffer = await clientFile.read(20);
+    console.log("Contenuto del file: ", data.toString("utf-8"));
+    return data;
+}
+
+async function download_file(data){
+    const my_data_filename = "./downloads/someFile.txt";
+    await promisify(fs.writeFile)(my_data_filename, data.toString("utf-8"), "utf8");
+}
+
+async function size_file(clientFile){
+    const size = await clientFile.size();
+    console.log("The current file size is : ", size, " bytes");
+}
+
+async function write_file(clientFile){
+    const dataToWrite = Buffer.from("Some data");
+    await clientFile.write(dataToWrite);
+}
+
+async function ending(clientFile,session){
+    await clientFile.close();
+
+    // close session
+    await session.close();
+ 
+    // disconnecting
+    await client.disconnect();
+    console.log("Done!");
+}

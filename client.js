@@ -41,10 +41,10 @@ var node_opcua_file_transfer_1 = require("node-opcua-file-transfer");
 var util_1 = require("util");
 var fs = require("fs");
 var readline = require("readline");
-var rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+//var rl = readline.createInterface({
+//    input: process.stdin,
+//    output: process.stdout
+//  });
 var connectionStrategy = {
     initialDelay: 1000,
     maxRetry: 1
@@ -61,82 +61,211 @@ var client = node_opcua_1.OPCUAClient.create(options);
 var endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var session, browseResult, _i, _a, reference, fileNodeId, clientFile, mode, data, my_data_filename, size, err_1;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var session, clientFile, data, err_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
                 case 0:
-                    _b.trys.push([0, 13, , 14]);
+                    _a.trys.push([0, 11, , 12]);
                     // step 1 : connect to
-                    return [4 /*yield*/, client.connect(endpointUrl)];
+                    return [4 /*yield*/, connect(endpointUrl)];
                 case 1:
                     // step 1 : connect to
-                    _b.sent();
-                    console.log("Client connected!");
-                    return [4 /*yield*/, client.createSession()];
+                    _a.sent();
+                    return [4 /*yield*/, create_session()];
                 case 2:
-                    session = _b.sent();
-                    console.log("Session created!");
+                    session = _a.sent();
                     // step 3 : browse
-                    return [4 /*yield*/, rl.question("inserisci qualcosa ", function (answer) {
-                            console.log(answer);
-                            rl.close();
-                        })];
+                    return [4 /*yield*/, browse(session)];
                 case 3:
                     // step 3 : browse
-                    _b.sent();
-                    return [4 /*yield*/, session.browse("ns=1;i=1000")];
+                    _a.sent();
+                    return [4 /*yield*/, read_node(session)];
                 case 4:
+                    clientFile = _a.sent();
+                    // operations on file
+                    return [4 /*yield*/, open_file(clientFile)];
+                case 5:
+                    // operations on file
+                    _a.sent();
+                    return [4 /*yield*/, read_file(clientFile)];
+                case 6:
+                    data = _a.sent();
+                    return [4 /*yield*/, download_file(data)];
+                case 7:
+                    _a.sent();
+                    return [4 /*yield*/, size_file(clientFile)];
+                case 8:
+                    _a.sent();
+                    return [4 /*yield*/, write_file(clientFile)];
+                case 9:
+                    _a.sent();
+                    // closing file, session and connection
+                    return [4 /*yield*/, ending(clientFile, session)];
+                case 10:
+                    // closing file, session and connection
+                    _a.sent();
+                    return [3 /*break*/, 12];
+                case 11:
+                    err_1 = _a.sent();
+                    console.log("An error has occured : ", err_1);
+                    return [3 /*break*/, 12];
+                case 12: return [2 /*return*/];
+            }
+        });
+    });
+}
+main();
+function connect(endpoint) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, client.connect(endpoint)];
+                case 1:
+                    _a.sent();
+                    console.log("Client connected!");
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function create_session() {
+    return __awaiter(this, void 0, void 0, function () {
+        var session;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, client.createSession()];
+                case 1:
+                    session = _a.sent();
+                    console.log("Session created!");
+                    return [2 /*return*/, session];
+            }
+        });
+    });
+}
+function browse(session) {
+    return __awaiter(this, void 0, void 0, function () {
+        var browseResult, _i, _a, reference;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0: return [4 /*yield*/, session.browse("ns=1;i=1000")];
+                case 1:
                     browseResult = _b.sent();
                     console.log("References of FileSystem :");
                     for (_i = 0, _a = browseResult.references; _i < _a.length; _i++) {
                         reference = _a[_i];
                         console.log("   -> ", reference.browseName.toString());
                     }
-                    fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, "MyFile", 1);
-                    clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
-                    mode = node_opcua_file_transfer_1.OpenFileMode.ReadWriteAppend;
-                    return [4 /*yield*/, clientFile.open(mode)];
-                case 5:
-                    _b.sent();
-                    return [4 /*yield*/, clientFile.setPosition([0, 1])];
-                case 6:
-                    _b.sent();
-                    return [4 /*yield*/, clientFile.read(20)];
-                case 7:
-                    data = _b.sent();
-                    console.log("Contenuto del file: ", data.toString("utf-8"));
-                    my_data_filename = "./downloads/someFile.txt";
-                    return [4 /*yield*/, util_1.promisify(fs.writeFile)(my_data_filename, data.toString("utf-8"), "utf8")];
-                case 8:
-                    _b.sent();
-                    return [4 /*yield*/, clientFile.size()];
-                case 9:
-                    size = _b.sent();
-                    console.log("The current file size is : ", size, " bytes");
-                    // don't forget to close the file when done
-                    return [4 /*yield*/, clientFile.close()];
-                case 10:
-                    // don't forget to close the file when done
-                    _b.sent();
-                    // close session
-                    return [4 /*yield*/, session.close()];
-                case 11:
-                    // close session
-                    _b.sent();
-                    // disconnecting
-                    return [4 /*yield*/, client.disconnect()];
-                case 12:
-                    // disconnecting
-                    _b.sent();
-                    console.log("Done!");
-                    return [3 /*break*/, 14];
-                case 13:
-                    err_1 = _b.sent();
-                    console.log("An error has occured : ", err_1);
-                    return [3 /*break*/, 14];
-                case 14: return [2 /*return*/];
+                    return [2 /*return*/];
             }
         });
     });
 }
-main();
+function read_node(session) {
+    return __awaiter(this, void 0, void 0, function () {
+        var fileNodeId, clientFile;
+        return __generator(this, function (_a) {
+            fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, "MyFile", 1);
+            clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
+            return [2 /*return*/, clientFile];
+        });
+    });
+}
+function open_file(clientFile) {
+    return __awaiter(this, void 0, void 0, function () {
+        var mode;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    mode = node_opcua_file_transfer_1.OpenFileMode.ReadWriteAppend;
+                    return [4 /*yield*/, clientFile.open(mode)];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function read_file(clientFile) {
+    return __awaiter(this, void 0, void 0, function () {
+        var data;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, clientFile.setPosition(0)];
+                case 1:
+                    _a.sent();
+                    return [4 /*yield*/, clientFile.read(20)];
+                case 2:
+                    data = _a.sent();
+                    console.log("Contenuto del file: ", data.toString("utf-8"));
+                    return [2 /*return*/, data];
+            }
+        });
+    });
+}
+function download_file(data) {
+    return __awaiter(this, void 0, void 0, function () {
+        var my_data_filename;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    my_data_filename = "./downloads/someFile.txt";
+                    return [4 /*yield*/, util_1.promisify(fs.writeFile)(my_data_filename, data.toString("utf-8"), "utf8")];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function size_file(clientFile) {
+    return __awaiter(this, void 0, void 0, function () {
+        var size;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, clientFile.size()];
+                case 1:
+                    size = _a.sent();
+                    console.log("The current file size is : ", size, " bytes");
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function write_file(clientFile) {
+    return __awaiter(this, void 0, void 0, function () {
+        var dataToWrite;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    dataToWrite = Buffer.from("Some data");
+                    return [4 /*yield*/, clientFile.write(dataToWrite)];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function ending(clientFile, session) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, clientFile.close()];
+                case 1:
+                    _a.sent();
+                    // close session
+                    return [4 /*yield*/, session.close()];
+                case 2:
+                    // close session
+                    _a.sent();
+                    // disconnecting
+                    return [4 /*yield*/, client.disconnect()];
+                case 3:
+                    // disconnecting
+                    _a.sent();
+                    console.log("Done!");
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
