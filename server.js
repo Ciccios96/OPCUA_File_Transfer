@@ -20,7 +20,8 @@ function post_initialize() {
 
     function construct_my_address_space(server) {
 
-        const my_data_filename = "./server_files/file.txt";
+        const my_data_filename1 = "./server_files/file.txt";
+        const my_data_filename2 = "./server_files/prova.pdf";
     
         const addressSpace = server.engine.addressSpace;
         const namespace = addressSpace.getOwnNamespace();
@@ -46,7 +47,7 @@ function post_initialize() {
         })
 
         file_transfer.installFileType(myFile, { 
-            filename: my_data_filename
+            filename: my_data_filename1
         });
 
         const myFile2 = fileType.instantiate({
@@ -56,8 +57,18 @@ function post_initialize() {
         })
 
         file_transfer.installFileType(myFile2, { 
-            filename: my_data_filename
-        });         
+            filename: my_data_filename1
+        });  
+        
+        const myFile3 = fileType.instantiate({
+            nodeId: "s=PDF_File",
+            browseName: "PDF_File",
+            organizedBy: FileSystem
+        })
+
+        file_transfer.installFileType(myFile3, { 
+            filename: my_data_filename2
+        }); 
 
     }
     construct_my_address_space(server);
