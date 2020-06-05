@@ -40,6 +40,7 @@ var node_opcua_1 = require("node-opcua");
 var node_opcua_file_transfer_1 = require("node-opcua-file-transfer");
 var util_1 = require("util");
 var fs = require("fs");
+var pdf = require("pdfkit");
 var readline = require("readline");
 //var rl = readline.createInterface({
 //    input: process.stdin,
@@ -61,11 +62,11 @@ var client = node_opcua_1.OPCUAClient.create(options);
 var endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var session, clientFile, data, err_1;
+        var session, clientFile, data, clientFile2, data2, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 11, , 12]);
+                    _a.trys.push([0, 16, , 17]);
                     // step 1 : connect to
                     return [4 /*yield*/, connect(endpointUrl)];
                 case 1:
@@ -79,15 +80,15 @@ function main() {
                 case 3:
                     // step 3 : browse
                     _a.sent();
-                    return [4 /*yield*/, read_node(session)];
+                    return [4 /*yield*/, read_node(session, "MyFile")];
                 case 4:
                     clientFile = _a.sent();
-                    // operations on file
+                    // operations on txt file
                     return [4 /*yield*/, open_file(clientFile)];
                 case 5:
-                    // operations on file
+                    // operations on txt file
                     _a.sent();
-                    return [4 /*yield*/, read_file(clientFile)];
+                    return [4 /*yield*/, read_file(clientFile, 20)];
                 case 6:
                     data = _a.sent();
                     return [4 /*yield*/, download_file(data)];
@@ -99,17 +100,32 @@ function main() {
                     return [4 /*yield*/, write_file(clientFile)];
                 case 9:
                     _a.sent();
+                    return [4 /*yield*/, read_node(session, "PDF_File")];
+                case 10:
+                    clientFile2 = _a.sent();
+                    return [4 /*yield*/, open_file(clientFile2)];
+                case 11:
+                    _a.sent();
+                    return [4 /*yield*/, read_file(clientFile2, 83750)];
+                case 12:
+                    data2 = _a.sent();
+                    return [4 /*yield*/, download_PDF(data2)];
+                case 13:
+                    _a.sent();
+                    return [4 /*yield*/, size_file(clientFile2)];
+                case 14:
+                    _a.sent();
                     // closing file, session and connection
                     return [4 /*yield*/, ending(clientFile, session)];
-                case 10:
+                case 15:
                     // closing file, session and connection
                     _a.sent();
-                    return [3 /*break*/, 12];
-                case 11:
+                    return [3 /*break*/, 17];
+                case 16:
                     err_1 = _a.sent();
                     console.log("An error has occured : ", err_1);
-                    return [3 /*break*/, 12];
-                case 12: return [2 /*return*/];
+                    return [3 /*break*/, 17];
+                case 17: return [2 /*return*/];
             }
         });
     });
@@ -160,11 +176,11 @@ function browse(session) {
         });
     });
 }
-function read_node(session) {
+function read_node(session, StringID) {
     return __awaiter(this, void 0, void 0, function () {
         var fileNodeId, clientFile;
         return __generator(this, function (_a) {
-            fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, "MyFile", 1);
+            fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, StringID, 1);
             clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
             return [2 /*return*/, clientFile];
         });
@@ -185,7 +201,7 @@ function open_file(clientFile) {
         });
     });
 }
-function read_file(clientFile) {
+function read_file(clientFile, bytes) {
     return __awaiter(this, void 0, void 0, function () {
         var data;
         return __generator(this, function (_a) {
@@ -193,7 +209,7 @@ function read_file(clientFile) {
                 case 0: return [4 /*yield*/, clientFile.setPosition(0)];
                 case 1:
                     _a.sent();
-                    return [4 /*yield*/, clientFile.read(20)];
+                    return [4 /*yield*/, clientFile.read(bytes)];
                 case 2:
                     data = _a.sent();
                     console.log("Contenuto del file: ", data.toString("utf-8"));
@@ -214,6 +230,18 @@ function download_file(data) {
                     _a.sent();
                     return [2 /*return*/];
             }
+        });
+    });
+}
+function download_PDF(data) {
+    return __awaiter(this, void 0, void 0, function () {
+        var myPdf;
+        return __generator(this, function (_a) {
+            myPdf = new pdf;
+            myPdf.pipe(fs.createWriteStream('./downloads/node.pdf'));
+            myPdf.font("Times-Roman").fontSize(20).text(data.toString("utf-8"), 100, 100);
+            myPdf.end();
+            return [2 /*return*/];
         });
     });
 }

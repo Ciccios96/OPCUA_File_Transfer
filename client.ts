@@ -8,6 +8,7 @@ import {
 import { ClientFile, OpenFileMode } from "node-opcua-file-transfer";
 import {promisify} from "util";
 const fs = require("fs");
+const pdf = require("pdfkit");
 const readline = require("readline");
 
 //var rl = readline.createInterface({
@@ -42,18 +43,30 @@ async function main() {
         await browse(session);
 
     // step 4 : read a NodeId
-        const clientFile = await read_node(session);
+        const clientFile = await read_node(session,"MyFile");
 
-    // operations on file
+    // operations on txt file
         await open_file(clientFile);
 
-        const data = await read_file(clientFile);
+        const data = await read_file(clientFile,20);
 
         await download_file(data);
 
         await size_file(clientFile);
 
         await write_file(clientFile);
+
+    // operation on pdf file
+        const clientFile2 = await read_node(session,"PDF_File");
+
+        await open_file(clientFile2);
+
+        const data2 = await read_file(clientFile2,83750);
+
+        await download_PDF(data2);
+
+        await size_file(clientFile2);
+        
 
     // closing file, session and connection
         await ending(clientFile,session);
@@ -84,8 +97,8 @@ async function browse(session){
     }
 }
 
-async function read_node(session){
-    const fileNodeId = new NodeId(NodeIdType.STRING, "MyFile", 1);
+async function read_node(session,StringID){
+    const fileNodeId = new NodeId(NodeIdType.STRING, StringID, 1);
     const clientFile = new ClientFile(session, fileNodeId);
     return clientFile;
 }
@@ -95,9 +108,9 @@ async function open_file(clientFile){
     await clientFile.open(mode);
 }
 
-async function read_file(clientFile){
+async function read_file(clientFile,bytes){
     await clientFile.setPosition(0);
-    const data: Buffer = await clientFile.read(20);
+    const data: Buffer = await clientFile.read(bytes);
     console.log("Contenuto del file: ", data.toString("utf-8"));
     return data;
 }
@@ -105,6 +118,15 @@ async function read_file(clientFile){
 async function download_file(data){
     const my_data_filename = "./downloads/someFile.txt";
     await promisify(fs.writeFile)(my_data_filename, data.toString("utf-8"), "utf8");
+}
+
+async function download_PDF(data){
+    var myPdf = new pdf;
+    myPdf.pipe(fs.createWriteStream('./downloads/node.pdf'));
+
+    myPdf.font("Times-Roman").fontSize(20).text(data.toString("utf-8"),100,100);
+
+    myPdf.end();
 }
 
 async function size_file(clientFile){
