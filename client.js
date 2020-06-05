@@ -235,13 +235,16 @@ function download_file(data) {
 }
 function download_PDF(data) {
     return __awaiter(this, void 0, void 0, function () {
-        var myPdf;
+        var my_data_filename;
         return __generator(this, function (_a) {
-            myPdf = new pdf;
-            myPdf.pipe(fs.createWriteStream('./downloads/node.pdf'));
-            myPdf.font("Times-Roman").fontSize(20).text(data.toString("utf-8"), 100, 100);
-            myPdf.end();
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0:
+                    my_data_filename = "./downloads/someFile.pdf";
+                    return [4 /*yield*/, util_1.promisify(fs.writeFile)(my_data_filename, data, "binary")];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
         });
     });
 }

@@ -121,12 +121,8 @@ async function download_file(data){
 }
 
 async function download_PDF(data){
-    var myPdf = new pdf;
-    myPdf.pipe(fs.createWriteStream('./downloads/node.pdf'));
-
-    myPdf.font("Times-Roman").fontSize(20).text(data.toString("utf-8"),100,100);
-
-    myPdf.end();
+    const my_data_filename = "./downloads/someFile.pdf";
+    await promisify(fs.writeFile)(my_data_filename, data, "binary");
 }
 
 async function size_file(clientFile){
