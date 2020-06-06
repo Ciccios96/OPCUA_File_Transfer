@@ -22,6 +22,7 @@ function post_initialize() {
 
         const my_data_filename1 = "./server_files/file.txt";
         const my_data_filename2 = "./server_files/prova.pdf";
+        const my_data_filename3 = "./server_files/dummy.txt";
     
         const addressSpace = server.engine.addressSpace;
         const namespace = addressSpace.getOwnNamespace();
@@ -69,6 +70,53 @@ function post_initialize() {
         file_transfer.installFileType(myFile3, { 
             filename: my_data_filename2
         }); 
+
+        const objectFile = namespace.addObject({
+            organizedBy: FileSystem,
+            browseName: "ObjectFile"
+        });
+
+        const method = namespace.addMethod(objectFile,{
+
+            browseName: "createFile",
+        
+            inputArguments:  [
+                {
+                    name:"filename",
+                    description: { text: "specifies the name File" },
+                    dataType: opcua.DataType.String        
+                }
+             ],
+        
+            outputArguments: []
+        });
+
+        method.bindMethod((inputArguments,context,callback) => {
+
+            const file_name = inputArguments[0].value;
+        
+            console.log("Hello World ! I will create a file named ",file_name);
+
+            nodeid = "s=" + file_name;
+
+            const myFile4 = fileType.instantiate({
+                nodeId: nodeid,
+                browseName: file_name,
+                organizedBy: FileSystem
+            })
+    
+            file_transfer.installFileType(myFile4, { 
+                filename: my_data_filename3
+            }); 
+
+            console.log("ho creato il nodo FileType");
+        
+            const callMethodResult = {
+                statusCode: opcua.StatusCodes.Good,
+                outputArguments: []
+            };
+            callback(null,callMethodResult);
+        });
 
     }
     construct_my_address_space(server);

@@ -3,18 +3,12 @@ import {
     MessageSecurityMode, SecurityPolicy,
     NodeId,
     NodeIdType,
-    randomInt16
+    coerceNodeId,
+    DataType
 } from "node-opcua";
 import { ClientFile, OpenFileMode } from "node-opcua-file-transfer";
 import {promisify} from "util";
 const fs = require("fs");
-const pdf = require("pdfkit");
-const readline = require("readline");
-
-//var rl = readline.createInterface({
-//    input: process.stdin,
-//    output: process.stdout
-//  });
  
 const connectionStrategy = {
     initialDelay: 1000,
@@ -28,21 +22,20 @@ const options = {
     endpoint_must_exist: false,
 };
 const client = OPCUAClient.create(options);
-// const endpointUrl = "opc.tcp://opcuademo.sterfive.com:26543";
 const endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
 
 async function main() {
     try {
-    // step 1 : connect to
+    //  connect to
         await connect(endpointUrl);
  
-    // step 2 : createSession
+    // createSession
         const session = await create_session();
  
-    // step 3 : browse
+    // browse
         await browse(session);
 
-    // step 4 : read a NodeId
+    //  read a NodeId
         const clientFile = await read_node(session,"MyFile");
 
     // operations on txt file
@@ -66,7 +59,9 @@ async function main() {
         await download_PDF(data2);
 
         await size_file(clientFile2);
-        
+
+        // creating a new Node in the server
+        await call_method(session);
 
     // closing file, session and connection
         await ending(clientFile,session);
@@ -144,4 +139,21 @@ async function ending(clientFile,session){
     // disconnecting
     await client.disconnect();
     console.log("Done!");
+}
+
+async function call_method(session) {
+    const methodsToCall = [];
+    const nodeID = coerceNodeId("ns=1;i=1003");
+    methodsToCall.push({
+        objectId: coerceNodeId("ns=1;i=1002"),
+        methodId: nodeID,
+        inputArguments: [{
+            dataType: DataType.String,
+            value: Math.random().toString(10).slice(2)
+        }]
+    });
+    session.call(methodsToCall, function(err,results){
+        // ....
+    });
+    console.log("Ho chiamato il metodo: " + nodeID);
 }

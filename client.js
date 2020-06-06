@@ -40,12 +40,6 @@ var node_opcua_1 = require("node-opcua");
 var node_opcua_file_transfer_1 = require("node-opcua-file-transfer");
 var util_1 = require("util");
 var fs = require("fs");
-var pdf = require("pdfkit");
-var readline = require("readline");
-//var rl = readline.createInterface({
-//    input: process.stdin,
-//    output: process.stdout
-//  });
 var connectionStrategy = {
     initialDelay: 1000,
     maxRetry: 1
@@ -58,7 +52,6 @@ var options = {
     endpoint_must_exist: false
 };
 var client = node_opcua_1.OPCUAClient.create(options);
-// const endpointUrl = "opc.tcp://opcuademo.sterfive.com:26543";
 var endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
 function main() {
     return __awaiter(this, void 0, void 0, function () {
@@ -66,19 +59,19 @@ function main() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 16, , 17]);
-                    // step 1 : connect to
+                    _a.trys.push([0, 17, , 18]);
+                    //  connect to
                     return [4 /*yield*/, connect(endpointUrl)];
                 case 1:
-                    // step 1 : connect to
+                    //  connect to
                     _a.sent();
                     return [4 /*yield*/, create_session()];
                 case 2:
                     session = _a.sent();
-                    // step 3 : browse
+                    // browse
                     return [4 /*yield*/, browse(session)];
                 case 3:
-                    // step 3 : browse
+                    // browse
                     _a.sent();
                     return [4 /*yield*/, read_node(session, "MyFile")];
                 case 4:
@@ -115,17 +108,22 @@ function main() {
                     return [4 /*yield*/, size_file(clientFile2)];
                 case 14:
                     _a.sent();
+                    // creating a new Node in the server
+                    return [4 /*yield*/, call_method(session)];
+                case 15:
+                    // creating a new Node in the server
+                    _a.sent();
                     // closing file, session and connection
                     return [4 /*yield*/, ending(clientFile, session)];
-                case 15:
+                case 16:
                     // closing file, session and connection
                     _a.sent();
-                    return [3 /*break*/, 17];
-                case 16:
+                    return [3 /*break*/, 18];
+                case 17:
                     err_1 = _a.sent();
                     console.log("An error has occured : ", err_1);
-                    return [3 /*break*/, 17];
-                case 17: return [2 /*return*/];
+                    return [3 /*break*/, 18];
+                case 18: return [2 /*return*/];
             }
         });
     });
@@ -297,6 +295,28 @@ function ending(clientFile, session) {
                     console.log("Done!");
                     return [2 /*return*/];
             }
+        });
+    });
+}
+function call_method(session) {
+    return __awaiter(this, void 0, void 0, function () {
+        var methodsToCall, nodeID;
+        return __generator(this, function (_a) {
+            methodsToCall = [];
+            nodeID = node_opcua_1.coerceNodeId("ns=1;i=1003");
+            methodsToCall.push({
+                objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
+                methodId: nodeID,
+                inputArguments: [{
+                        dataType: node_opcua_1.DataType.String,
+                        value: Math.random().toString(10).slice(2)
+                    }]
+            });
+            session.call(methodsToCall, function (err, results) {
+                // ....
+            });
+            console.log("Ho chiamato il metodo: " + nodeID);
+            return [2 /*return*/];
         });
     });
 }
