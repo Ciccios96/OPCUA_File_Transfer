@@ -1,132 +1,106 @@
+"use strict";
+exports.__esModule = true;
 /*global require,setInterval,console */
-const opcua = require("node-opcua");
-const util = require("util");
-const fs = require("fs");
-const file_transfer = require("node-opcua-file-transfer");
-
+var opcua = require("node-opcua");
+var util = require("util");
+var fs = require("fs");
+var file_transfer = require("node-opcua-file-transfer");
+var util_1 = require("util");
 // Let's create an instance of OPCUAServer
-const server = new opcua.OPCUAServer({
-    port: 4334, // the port of the listening socket of the server
-    resourcePath: "/UA/MyLittleServer", // this path will be added to the endpoint resource name
-     buildInfo : {
+var server = new opcua.OPCUAServer({
+    port: 4334,
+    resourcePath: "/UA/MyLittleServer",
+    buildInfo: {
         productName: "MySampleServer1",
         buildNumber: "7658",
-        buildDate: new Date(2014,5,2)
+        buildDate: new Date(2014, 5, 2)
     }
 });
-
 function post_initialize() {
     console.log("initialized");
-
     function construct_my_address_space(server) {
-
-        const my_data_filename1 = "./server_files/file.txt";
-        const my_data_filename2 = "./server_files/prova.pdf";
-        const my_data_filename3 = "./server_files/dummy.txt";
-    
-        const addressSpace = server.engine.addressSpace;
-        const namespace = addressSpace.getOwnNamespace();
-        
+        var my_data_filename1 = "./server_files/file.txt";
+        var my_data_filename2 = "./server_files/prova.pdf";
+        var my_data_filename3 = "./server_files/dummy.txt";
+        var addressSpace = server.engine.addressSpace;
+        var namespace = addressSpace.getOwnNamespace();
         //creazione folders
-
-        const FileSystem = namespace.addFolder(addressSpace.rootFolder,{
+        var FileSystem = namespace.addFolder(addressSpace.rootFolder, {
             browseName: "FileSystem"
-        }); 
-
-        const Documents = namespace.addFolder(FileSystem,{
+        });
+        var Documents = namespace.addFolder(FileSystem, {
             browseName: "Documents"
         });
-
         //instanzio il fileType
-        const fileType = addressSpace.findObjectType("FileType");
-
+        var fileType = addressSpace.findObjectType("FileType");
         //creo i vari nodi filetype
-        const myFile = fileType.instantiate({
+        var myFile = fileType.instantiate({
             nodeId: "s=MyFile",
             browseName: "MyFile",
             organizedBy: FileSystem
-        })
-
-        file_transfer.installFileType(myFile, { 
+        });
+        file_transfer.installFileType(myFile, {
             filename: my_data_filename1
         });
-
-        const myFile2 = fileType.instantiate({
+        var myFile2 = fileType.instantiate({
             nodeId: "s=Document_File",
             browseName: "Document_File",
             organizedBy: Documents
-        })
-
-        file_transfer.installFileType(myFile2, { 
+        });
+        file_transfer.installFileType(myFile2, {
             filename: my_data_filename1
-        });  
-        
-        const myFile3 = fileType.instantiate({
+        });
+        var myFile3 = fileType.instantiate({
             nodeId: "s=PDF_File",
             browseName: "PDF_File",
             organizedBy: FileSystem
-        })
-
-        file_transfer.installFileType(myFile3, { 
+        });
+        file_transfer.installFileType(myFile3, {
             filename: my_data_filename2
-        }); 
-
-        const objectFile = namespace.addObject({
+        });
+        var objectFile = namespace.addObject({
             organizedBy: FileSystem,
             browseName: "ObjectFile"
         });
-
-        const method = namespace.addMethod(objectFile,{
-
+        var method = namespace.addMethod(objectFile, {
             browseName: "createFile",
-        
-            inputArguments:  [
+            inputArguments: [
                 {
-                    name:"filename",
-                    description: { text: "specifies the name File" },
-                    dataType: opcua.DataType.String        
+                    name: "filename",
+                    description: { text: "specifies the name of the File" },
+                    dataType: opcua.DataType.String
                 }
-             ],
-        
+            ],
             outputArguments: []
         });
-
-        method.bindMethod((inputArguments,context,callback) => {
-
-            const file_name = inputArguments[0].value;
-        
-            console.log("Hello World ! I will create a file named ",file_name);
-
-            nodeid = "s=" + file_name;
-
-            const myFile4 = fileType.instantiate({
+        method.bindMethod(function (inputArguments, context, callback) {
+            var file_name = inputArguments[0].value;
+            console.log("Hello World ! I will create a file named ", file_name);
+            var nodeid = "s=" + file_name;
+            var my_data_filename3 = "./server_files/" + file_name;
+            util_1.promisify(fs.writeFile)(my_data_filename3, "", "utf8");
+            var myFile4 = fileType.instantiate({
                 nodeId: nodeid,
                 browseName: file_name,
                 organizedBy: FileSystem
-            })
-    
-            file_transfer.installFileType(myFile4, { 
+            });
+            file_transfer.installFileType(myFile4, {
                 filename: my_data_filename3
-            }); 
-
+            });
             console.log("ho creato il nodo FileType");
-        
-            const callMethodResult = {
+            var callMethodResult = {
                 statusCode: opcua.StatusCodes.Good,
                 outputArguments: []
             };
-            callback(null,callMethodResult);
+            callback(null, callMethodResult);
         });
-
     }
     construct_my_address_space(server);
-    server.start(function() {
+    server.start(function () {
         console.log("Server is now listening ... ( press CTRL+C to stop)");
         console.log("port ", server.endpoints[0].port);
-        const endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl;
-        console.log(" the primary server endpoint url is ", endpointUrl );
+        var endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl;
+        console.log(" the primary server endpoint url is ", endpointUrl);
     });
-
-
 }
 server.initialize(post_initialize);
