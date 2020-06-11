@@ -55,11 +55,11 @@ var client = node_opcua_1.OPCUAClient.create(options);
 var endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var session, clientFile, data, clientFile2, data2, err_1;
+        var session, filename, clientFile, data, clientFile2, data2, clientFile3, data3, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 17, , 18]);
+                    _a.trys.push([0, 24, , 25]);
                     //  connect to
                     return [4 /*yield*/, connect(endpointUrl)];
                 case 1:
@@ -73,57 +73,78 @@ function main() {
                 case 3:
                     // browse
                     _a.sent();
-                    return [4 /*yield*/, read_node(session, "MyFile")];
+                    return [4 /*yield*/, call_method(session)];
                 case 4:
+                    filename = _a.sent();
+                    return [4 /*yield*/, read_node(session, "MyFile")];
+                case 5:
                     clientFile = _a.sent();
                     // operations on txt file
                     return [4 /*yield*/, open_file(clientFile)];
-                case 5:
+                case 6:
                     // operations on txt file
                     _a.sent();
                     return [4 /*yield*/, read_file(clientFile, 20)];
-                case 6:
+                case 7:
                     data = _a.sent();
                     return [4 /*yield*/, download_file(data)];
-                case 7:
-                    _a.sent();
-                    return [4 /*yield*/, size_file(clientFile)];
                 case 8:
                     _a.sent();
-                    return [4 /*yield*/, write_file(clientFile)];
+                    return [4 /*yield*/, size_file(clientFile)];
                 case 9:
                     _a.sent();
-                    return [4 /*yield*/, read_node(session, "PDF_File")];
+                    return [4 /*yield*/, write_file(clientFile)];
                 case 10:
+                    _a.sent();
+                    return [4 /*yield*/, read_node(session, "PDF_File")];
+                case 11:
                     clientFile2 = _a.sent();
                     return [4 /*yield*/, open_file(clientFile2)];
-                case 11:
+                case 12:
                     _a.sent();
                     return [4 /*yield*/, read_file(clientFile2, 83750)];
-                case 12:
+                case 13:
                     data2 = _a.sent();
                     return [4 /*yield*/, download_PDF(data2)];
-                case 13:
+                case 14:
                     _a.sent();
                     return [4 /*yield*/, size_file(clientFile2)];
-                case 14:
+                case 15:
                     _a.sent();
                     // creating a new Node in the server
                     return [4 /*yield*/, call_method(session)];
-                case 15:
+                case 16:
                     // creating a new Node in the server
+                    _a.sent();
+                    return [4 /*yield*/, read_node(session, filename)];
+                case 17:
+                    clientFile3 = _a.sent();
+                    return [4 /*yield*/, open_file(clientFile3)];
+                case 18:
+                    _a.sent();
+                    return [4 /*yield*/, read_file(clientFile3, 20)];
+                case 19:
+                    data3 = _a.sent();
+                    return [4 /*yield*/, download_file(data3)];
+                case 20:
+                    _a.sent();
+                    return [4 /*yield*/, size_file(clientFile3)];
+                case 21:
+                    _a.sent();
+                    return [4 /*yield*/, write_file(clientFile3)];
+                case 22:
                     _a.sent();
                     // closing file, session and connection
                     return [4 /*yield*/, ending(clientFile, session)];
-                case 16:
+                case 23:
                     // closing file, session and connection
                     _a.sent();
-                    return [3 /*break*/, 18];
-                case 17:
+                    return [3 /*break*/, 25];
+                case 24:
                     err_1 = _a.sent();
                     console.log("An error has occured : ", err_1);
-                    return [3 /*break*/, 18];
-                case 18: return [2 /*return*/];
+                    return [3 /*break*/, 25];
+                case 25: return [2 /*return*/];
             }
         });
     });
@@ -300,23 +321,24 @@ function ending(clientFile, session) {
 }
 function call_method(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var methodsToCall, nodeID;
+        var methodsToCall, name, nodeID;
         return __generator(this, function (_a) {
             methodsToCall = [];
+            name = Math.random().toString(10).slice(2);
             nodeID = node_opcua_1.coerceNodeId("ns=1;i=1003");
             methodsToCall.push({
                 objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
                 methodId: nodeID,
                 inputArguments: [{
                         dataType: node_opcua_1.DataType.String,
-                        value: Math.random().toString(10).slice(2)
+                        value: name
                     }]
             });
             session.call(methodsToCall, function (err, results) {
                 // ....
             });
             console.log("Ho chiamato il metodo: " + nodeID);
-            return [2 /*return*/];
+            return [2 /*return*/, name];
         });
     });
 }

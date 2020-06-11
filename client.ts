@@ -35,6 +35,9 @@ async function main() {
     // browse
         await browse(session);
 
+    // creating a new node
+        const filename = await call_method(session);
+
     //  read a NodeId
         const clientFile = await read_node(session,"MyFile");
 
@@ -60,8 +63,18 @@ async function main() {
 
         await size_file(clientFile2);
 
-        // creating a new Node in the server
-        await call_method(session);
+    // closing file, session and connection
+        const clientFile3 = await read_node(session,filename);
+
+        await open_file(clientFile3);
+
+        const data3 = await read_file(clientFile3,20);
+
+        await download_file(data3);
+
+        await size_file(clientFile3);
+
+        await write_file(clientFile3);
 
     // closing file, session and connection
         await ending(clientFile,session);
@@ -143,17 +156,19 @@ async function ending(clientFile,session){
 
 async function call_method(session) {
     const methodsToCall = [];
+    var name = Math.random().toString(10).slice(2);
     const nodeID = coerceNodeId("ns=1;i=1003");
     methodsToCall.push({
         objectId: coerceNodeId("ns=1;i=1002"),
         methodId: nodeID,
         inputArguments: [{
             dataType: DataType.String,
-            value: Math.random().toString(10).slice(2)
+            value: name
         }]
     });
     session.call(methodsToCall, function(err,results){
         // ....
     });
     console.log("Ho chiamato il metodo: " + nodeID);
+    return name
 }
