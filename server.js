@@ -35,24 +35,24 @@ function post_initialize() {
         var fileType = addressSpace.findObjectType("FileType");
         //creo i vari nodi filetype
         var myFile = fileType.instantiate({
-            nodeId: "s=MyFile",
-            browseName: "MyFile",
+            nodeId: "s=MyFile.txt",
+            browseName: "MyFile.txt",
             organizedBy: FileSystem
         });
         file_transfer.installFileType(myFile, {
             filename: my_data_filename1
         });
         var myFile2 = fileType.instantiate({
-            nodeId: "s=Document_File",
-            browseName: "Document_File",
+            nodeId: "s=Document_File.txt",
+            browseName: "Document_File.txt",
             organizedBy: Documents
         });
         file_transfer.installFileType(myFile2, {
             filename: my_data_filename1
         });
         var myFile3 = fileType.instantiate({
-            nodeId: "s=PDF_File",
-            browseName: "PDF_File",
+            nodeId: "s=PDF_File.pdf",
+            browseName: "PDF_File.pdf",
             organizedBy: FileSystem
         });
         file_transfer.installFileType(myFile3, {

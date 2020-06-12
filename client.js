@@ -40,6 +40,9 @@ var node_opcua_1 = require("node-opcua");
 var node_opcua_file_transfer_1 = require("node-opcua-file-transfer");
 var util_1 = require("util");
 var fs = require("fs");
+var inquirer = require("inquirer");
+var path = require("path");
+var command = "";
 var connectionStrategy = {
     initialDelay: 1000,
     maxRetry: 1
@@ -55,96 +58,65 @@ var client = node_opcua_1.OPCUAClient.create(options);
 var endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var session, filename, clientFile, data, clientFile2, data2, clientFile3, data3, err_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var session, _a, err_1;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    _a.trys.push([0, 24, , 25]);
+                    _b.trys.push([0, 18, , 19]);
                     //  connect to
                     return [4 /*yield*/, connect(endpointUrl)];
                 case 1:
                     //  connect to
-                    _a.sent();
+                    _b.sent();
                     return [4 /*yield*/, create_session()];
                 case 2:
-                    session = _a.sent();
-                    // browse
-                    return [4 /*yield*/, browse(session)];
+                    session = _b.sent();
+                    _b.label = 3;
                 case 3:
-                    // browse
-                    _a.sent();
-                    return [4 /*yield*/, call_method(session)];
+                    if (!(command != "exit")) return [3 /*break*/, 16];
+                    return [4 /*yield*/, input()];
                 case 4:
-                    filename = _a.sent();
-                    return [4 /*yield*/, read_node(session, "MyFile")];
-                case 5:
-                    clientFile = _a.sent();
-                    // operations on txt file
-                    return [4 /*yield*/, open_file(clientFile)];
+                    // user input
+                    command = _b.sent();
+                    _a = command;
+                    switch (_a) {
+                        case "browse": return [3 /*break*/, 5];
+                        case "read": return [3 /*break*/, 7];
+                        case "write": return [3 /*break*/, 9];
+                        case "upload": return [3 /*break*/, 11];
+                        case "exit": return [3 /*break*/, 13];
+                    }
+                    return [3 /*break*/, 14];
+                case 5: return [4 /*yield*/, browse(session)];
                 case 6:
-                    // operations on txt file
-                    _a.sent();
-                    return [4 /*yield*/, read_file(clientFile, 20)];
-                case 7:
-                    data = _a.sent();
-                    return [4 /*yield*/, download_file(data)];
+                    _b.sent();
+                    return [3 /*break*/, 15];
+                case 7: return [4 /*yield*/, read_file(session)];
                 case 8:
-                    _a.sent();
-                    return [4 /*yield*/, size_file(clientFile)];
-                case 9:
-                    _a.sent();
-                    return [4 /*yield*/, write_file(clientFile)];
+                    _b.sent();
+                    return [3 /*break*/, 15];
+                case 9: return [4 /*yield*/, write_file(session)];
                 case 10:
-                    _a.sent();
-                    return [4 /*yield*/, read_node(session, "PDF_File")];
-                case 11:
-                    clientFile2 = _a.sent();
-                    return [4 /*yield*/, open_file(clientFile2)];
+                    _b.sent();
+                    return [3 /*break*/, 15];
+                case 11: return [4 /*yield*/, call_method(session)];
                 case 12:
-                    _a.sent();
-                    return [4 /*yield*/, read_file(clientFile2, 83750)];
-                case 13:
-                    data2 = _a.sent();
-                    return [4 /*yield*/, download_PDF(data2)];
+                    _b.sent();
+                    return [3 /*break*/, 15];
+                case 13: return [3 /*break*/, 15];
                 case 14:
-                    _a.sent();
-                    return [4 /*yield*/, size_file(clientFile2)];
-                case 15:
-                    _a.sent();
-                    // creating a new Node in the server
-                    return [4 /*yield*/, call_method(session)];
-                case 16:
-                    // creating a new Node in the server
-                    _a.sent();
-                    return [4 /*yield*/, read_node(session, filename)];
+                    console.log("Wrong Input, retry");
+                    return [3 /*break*/, 15];
+                case 15: return [3 /*break*/, 3];
+                case 16: return [4 /*yield*/, ending(session)];
                 case 17:
-                    clientFile3 = _a.sent();
-                    return [4 /*yield*/, open_file(clientFile3)];
+                    _b.sent();
+                    return [3 /*break*/, 19];
                 case 18:
-                    _a.sent();
-                    return [4 /*yield*/, read_file(clientFile3, 20)];
-                case 19:
-                    data3 = _a.sent();
-                    return [4 /*yield*/, download_file(data3)];
-                case 20:
-                    _a.sent();
-                    return [4 /*yield*/, size_file(clientFile3)];
-                case 21:
-                    _a.sent();
-                    return [4 /*yield*/, write_file(clientFile3)];
-                case 22:
-                    _a.sent();
-                    // closing file, session and connection
-                    return [4 /*yield*/, ending(clientFile, session)];
-                case 23:
-                    // closing file, session and connection
-                    _a.sent();
-                    return [3 /*break*/, 25];
-                case 24:
-                    err_1 = _a.sent();
+                    err_1 = _b.sent();
                     console.log("An error has occured : ", err_1);
-                    return [3 /*break*/, 25];
-                case 25: return [2 /*return*/];
+                    return [3 /*break*/, 19];
+                case 19: return [2 /*return*/];
             }
         });
     });
@@ -195,44 +167,75 @@ function browse(session) {
         });
     });
 }
-function read_node(session, StringID) {
+function read_file(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var fileNodeId, clientFile;
-        return __generator(this, function (_a) {
-            fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, StringID, 1);
-            clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
-            return [2 /*return*/, clientFile];
-        });
-    });
-}
-function open_file(clientFile) {
-    return __awaiter(this, void 0, void 0, function () {
-        var mode;
+        var questions, risposta, oggettoJSON, parsedData, StringID, extention, fileNodeId, clientFile, mode, bytes, byte, data, questions, risposta, oggettoJSON_1, parsedData, risposta;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    mode = node_opcua_file_transfer_1.OpenFileMode.ReadWriteAppend;
+                    questions = [
+                        {
+                            type: 'input',
+                            name: 'command',
+                            message: 'What node do you want to read?'
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(questions)];
+                case 1:
+                    risposta = _a.sent();
+                    oggettoJSON = JSON.stringify(risposta, null, '');
+                    parsedData = JSON.parse(oggettoJSON);
+                    StringID = parsedData.command;
+                    extention = path.extname(StringID);
+                    fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, StringID, 1);
+                    clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
+                    mode = node_opcua_file_transfer_1.OpenFileMode.Read;
                     return [4 /*yield*/, clientFile.open(mode)];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-function read_file(clientFile, bytes) {
-    return __awaiter(this, void 0, void 0, function () {
-        var data;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, clientFile.setPosition(0)];
-                case 1:
-                    _a.sent();
-                    return [4 /*yield*/, clientFile.read(bytes)];
                 case 2:
+                    _a.sent();
+                    return [4 /*yield*/, clientFile.size()];
+                case 3:
+                    bytes = _a.sent();
+                    byte = bytes[1];
+                    return [4 /*yield*/, clientFile.setPosition(0)];
+                case 4:
+                    _a.sent();
+                    return [4 /*yield*/, clientFile.read(byte)];
+                case 5:
                     data = _a.sent();
                     console.log("Contenuto del file: ", data.toString("utf-8"));
-                    return [2 /*return*/, data];
+                    questions = [
+                        {
+                            type: 'input',
+                            name: 'command',
+                            message: 'Do you want to download it? y/n'
+                        }
+                    ];
+                    _a.label = 6;
+                case 6:
+                    if (!(risposta != "y" && risposta != "n")) return [3 /*break*/, 8];
+                    return [4 /*yield*/, inquirer.prompt(questions)];
+                case 7:
+                    risposta = _a.sent();
+                    oggettoJSON_1 = JSON.stringify(risposta, null, '');
+                    parsedData = JSON.parse(oggettoJSON_1);
+                    risposta = parsedData.command;
+                    switch (risposta) {
+                        case "y":
+                            if (extention == ".txt")
+                                download_file(data);
+                            else if (extention == ".pdf")
+                                download_PDF(data);
+                            break;
+                        case "n":
+                            console.log("I will return to the Main Menu");
+                            break;
+                        default:
+                            console.log("Wrong Input");
+                            break;
+                    }
+                    return [3 /*break*/, 6];
+                case 8: return [2 /*return*/];
             }
         });
     });
@@ -267,53 +270,76 @@ function download_PDF(data) {
         });
     });
 }
-function size_file(clientFile) {
+function write_file(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var size;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, clientFile.size()];
-                case 1:
-                    size = _a.sent();
-                    console.log("The current file size is : ", size, " bytes");
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-function write_file(clientFile) {
-    return __awaiter(this, void 0, void 0, function () {
-        var dataToWrite;
+        var ok, questions, risposta, oggettoJSON, parsedData, StringID, fileNodeId, clientFile, mode, questions, risposta, parsedData, dato, dataToWrite;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    dataToWrite = Buffer.from("Some data");
-                    return [4 /*yield*/, clientFile.write(dataToWrite)];
+                    ok = true;
+                    questions = [
+                        {
+                            type: 'input',
+                            name: 'command',
+                            message: 'What node do you want to write?'
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(questions)];
                 case 1:
+                    risposta = _a.sent();
+                    oggettoJSON = JSON.stringify(risposta, null, '');
+                    parsedData = JSON.parse(oggettoJSON);
+                    StringID = parsedData.command;
+                    if (path.extname(StringID) != ".txt") {
+                        console.log("Sorry, Can't Write a non txt File");
+                        ok = false;
+                    }
+                    fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, StringID, 1);
+                    clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
+                    mode = node_opcua_file_transfer_1.OpenFileMode.WriteAppend;
+                    return [4 /*yield*/, clientFile.open(mode)];
+                case 2:
                     _a.sent();
-                    return [2 /*return*/];
+                    if (!(ok == true)) return [3 /*break*/, 5];
+                    questions = [
+                        {
+                            type: 'input',
+                            name: 'command',
+                            message: 'What do you want to write?'
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(questions)];
+                case 3:
+                    risposta = _a.sent();
+                    oggettoJSON = JSON.stringify(risposta, null, '');
+                    parsedData = JSON.parse(oggettoJSON);
+                    dato = parsedData.command;
+                    dataToWrite = Buffer.from(dato);
+                    return [4 /*yield*/, clientFile.write(dataToWrite)];
+                case 4:
+                    _a.sent();
+                    _a.label = 5;
+                case 5: return [2 /*return*/];
             }
         });
     });
 }
-function ending(clientFile, session) {
+function ending(session) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, clientFile.close()];
+                case 0: 
+                // close session
+                return [4 /*yield*/, session.close()];
                 case 1:
-                    _a.sent();
-                    // close session
-                    return [4 /*yield*/, session.close()];
-                case 2:
                     // close session
                     _a.sent();
                     // disconnecting
                     return [4 /*yield*/, client.disconnect()];
-                case 3:
+                case 2:
                     // disconnecting
                     _a.sent();
-                    console.log("Done!");
+                    console.log("Exited");
                     return [2 /*return*/];
             }
         });
@@ -321,24 +347,70 @@ function ending(clientFile, session) {
 }
 function call_method(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var methodsToCall, name, nodeID;
+        var ok, questions, risposta, oggettoJSON, parsedData, name, methodsToCall, nodeID;
         return __generator(this, function (_a) {
-            methodsToCall = [];
-            name = Math.random().toString(10).slice(2);
-            nodeID = node_opcua_1.coerceNodeId("ns=1;i=1003");
-            methodsToCall.push({
-                objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
-                methodId: nodeID,
-                inputArguments: [{
-                        dataType: node_opcua_1.DataType.String,
-                        value: name
-                    }]
-            });
-            session.call(methodsToCall, function (err, results) {
-                // ....
-            });
-            console.log("Ho chiamato il metodo: " + nodeID);
-            return [2 /*return*/, name];
+            switch (_a.label) {
+                case 0:
+                    ok = true;
+                    questions = [
+                        {
+                            type: 'input',
+                            name: 'command',
+                            message: 'Name the new file node'
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(questions)];
+                case 1:
+                    risposta = _a.sent();
+                    oggettoJSON = JSON.stringify(risposta, null, '');
+                    parsedData = JSON.parse(oggettoJSON);
+                    name = parsedData.command;
+                    if (path.extname(name) != ".txt") {
+                        console.log("Sorry, Can't create a non txt File");
+                        ok = false;
+                    }
+                    else if (path.extname(name) == ".txt") {
+                        methodsToCall = [];
+                        nodeID = node_opcua_1.coerceNodeId("ns=1;i=1003");
+                        methodsToCall.push({
+                            objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
+                            methodId: nodeID,
+                            inputArguments: [{
+                                    dataType: node_opcua_1.DataType.String,
+                                    value: name
+                                }]
+                        });
+                        session.call(methodsToCall, function (err, results) {
+                            // ....
+                        });
+                        console.log("Ho chiamato il metodo: " + nodeID);
+                        return [2 /*return*/, name];
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function input() {
+    return __awaiter(this, void 0, void 0, function () {
+        var risposta, questions, oggettoJSON, parsedData;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    questions = [
+                        {
+                            type: 'input',
+                            name: 'command',
+                            message: 'Avaiable Commands: browse,read,write,upload,exit'
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(questions)];
+                case 1:
+                    risposta = _a.sent();
+                    oggettoJSON = JSON.stringify(risposta, null, '');
+                    parsedData = JSON.parse(oggettoJSON);
+                    return [2 /*return*/, parsedData.command.toLowerCase()];
+            }
         });
     });
 }

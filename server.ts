@@ -43,8 +43,8 @@ function post_initialize() {
 
         //creo i vari nodi filetype
         const myFile = fileType.instantiate({
-            nodeId: "s=MyFile",
-            browseName: "MyFile",
+            nodeId: "s=MyFile.txt",
+            browseName: "MyFile.txt",
             organizedBy: FileSystem
         })
 
@@ -53,8 +53,8 @@ function post_initialize() {
         });
 
         const myFile2 = fileType.instantiate({
-            nodeId: "s=Document_File",
-            browseName: "Document_File",
+            nodeId: "s=Document_File.txt",
+            browseName: "Document_File.txt",
             organizedBy: Documents
         })
 
@@ -63,8 +63,8 @@ function post_initialize() {
         });  
         
         const myFile3 = fileType.instantiate({
-            nodeId: "s=PDF_File",
-            browseName: "PDF_File",
+            nodeId: "s=PDF_File.pdf",
+            browseName: "PDF_File.pdf",
             organizedBy: FileSystem
         })
 

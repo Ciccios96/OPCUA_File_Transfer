@@ -9,7 +9,10 @@ import {
 import { ClientFile, OpenFileMode } from "node-opcua-file-transfer";
 import {promisify} from "util";
 const fs = require("fs");
- 
+const inquirer = require("inquirer");
+const path = require("path");
+var command = "";
+
 const connectionStrategy = {
     initialDelay: 1000,
     maxRetry: 1
@@ -32,56 +35,35 @@ async function main() {
     // createSession
         const session = await create_session();
  
-    // browse
-        await browse(session);
+    while(command != "exit"){
+    // user input
+        command = await input();
 
-    // creating a new node
-        const filename = await call_method(session);
-
-    //  read a NodeId
-        const clientFile = await read_node(session,"MyFile");
-
-    // operations on txt file
-        await open_file(clientFile);
-
-        const data = await read_file(clientFile,20);
-
-        await download_file(data);
-
-        await size_file(clientFile);
-
-        await write_file(clientFile);
-
-    // operation on pdf file
-        const clientFile2 = await read_node(session,"PDF_File");
-
-        await open_file(clientFile2);
-
-        const data2 = await read_file(clientFile2,83750);
-
-        await download_PDF(data2);
-
-        await size_file(clientFile2);
-
-    // closing file, session and connection
-        const clientFile3 = await read_node(session,filename);
-
-        await open_file(clientFile3);
-
-        const data3 = await read_file(clientFile3,20);
-
-        await download_file(data3);
-
-        await size_file(clientFile3);
-
-        await write_file(clientFile3);
-
-    // closing file, session and connection
-        await ending(clientFile,session);
-
+        switch(command){
+            case "browse":
+                await browse(session);
+                break;
+            case "read":
+                await read_file(session);
+                break;
+            case "write":
+                await write_file(session);
+                break;
+            case "upload":
+                await call_method(session);
+                break;
+            case "exit":
+                break;
+            default:
+                console.log("Wrong Input, retry");
+                break;
+            }
+        }
+    await ending(session);
     } catch(err) {
         console.log("An error has occured : ",err);
-    }
+        }
+    
 }
 main();
 
@@ -105,22 +87,58 @@ async function browse(session){
     }
 }
 
-async function read_node(session,StringID){
+async function read_file(session){
+    var questions = [
+        {
+            type: 'input',
+            name: 'command',
+            message: 'What node do you want to read?'
+        }
+    ];
+    var risposta = await inquirer.prompt(questions);
+    const oggettoJSON = JSON.stringify(risposta,null,'');
+    var parsedData = JSON.parse(oggettoJSON);
+    var StringID = parsedData.command;
+    var extention = path.extname(StringID);
     const fileNodeId = new NodeId(NodeIdType.STRING, StringID, 1);
     const clientFile = new ClientFile(session, fileNodeId);
-    return clientFile;
-}
+    const mode = OpenFileMode.Read;
 
-async function open_file(clientFile){
-    const mode = OpenFileMode.ReadWriteAppend;
     await clientFile.open(mode);
-}
 
-async function read_file(clientFile,bytes){
+    var bytes = await clientFile.size();
+
+    var byte = bytes[1];
     await clientFile.setPosition(0);
-    const data: Buffer = await clientFile.read(bytes);
+    const data: Buffer = await clientFile.read(byte);
     console.log("Contenuto del file: ", data.toString("utf-8"));
-    return data;
+    var questions = [
+        {
+            type: 'input',
+            name: 'command',
+            message: 'Do you want to download it? y/n'
+        }
+    ];
+    while(risposta != "y" && risposta != "n"){
+        var risposta = await inquirer.prompt(questions);
+        const oggettoJSON = JSON.stringify(risposta,null,'');
+        var parsedData = JSON.parse(oggettoJSON);
+        var risposta = parsedData.command;
+        switch(risposta){
+            case "y":
+                if(extention == ".txt")
+                    download_file(data);
+                else if (extention == ".pdf")
+                    download_PDF(data);
+                break;
+            case "n":
+                console.log("I will return to the Main Menu");
+                break;
+            default:
+                console.log("Wrong Input");
+                break;
+        }
+    }
 }
 
 async function download_file(data){
@@ -133,42 +151,105 @@ async function download_PDF(data){
     await promisify(fs.writeFile)(my_data_filename, data, "binary");
 }
 
-async function size_file(clientFile){
-    const size = await clientFile.size();
-    console.log("The current file size is : ", size, " bytes");
+async function write_file(session){
+    var ok = true;
+    var questions = [
+        {
+            type: 'input',
+            name: 'command',
+            message: 'What node do you want to write?'
+        }
+    ];
+    var risposta = await inquirer.prompt(questions);
+    var oggettoJSON = JSON.stringify(risposta,null,'');
+    var parsedData = JSON.parse(oggettoJSON);
+    var StringID = parsedData.command;
+    if (path.extname(StringID) != ".txt"){
+        console.log("Sorry, Can't Write a non txt File");
+        ok = false;
+    }
+    const fileNodeId = new NodeId(NodeIdType.STRING, StringID, 1);
+    const clientFile = new ClientFile(session, fileNodeId);
+    const mode = OpenFileMode.WriteAppend;
+
+    await clientFile.open(mode);
+
+    if (ok == true){
+        var questions = [
+            {
+                type: 'input',
+                name: 'command',
+                message: 'What do you want to write?'
+            }
+        ];
+        var risposta = await inquirer.prompt(questions);
+        oggettoJSON = JSON.stringify(risposta,null,'');
+        var parsedData = JSON.parse(oggettoJSON);
+        var dato = parsedData.command;
+    
+        const dataToWrite = Buffer.from(dato);
+        await clientFile.write(dataToWrite);
+    }
 }
 
-async function write_file(clientFile){
-    const dataToWrite = Buffer.from("Some data");
-    await clientFile.write(dataToWrite);
-}
-
-async function ending(clientFile,session){
-    await clientFile.close();
-
+async function ending(session){
     // close session
     await session.close();
  
     // disconnecting
     await client.disconnect();
-    console.log("Done!");
+    console.log("Exited");
 }
 
 async function call_method(session) {
-    const methodsToCall = [];
-    var name = Math.random().toString(10).slice(2);
-    const nodeID = coerceNodeId("ns=1;i=1003");
-    methodsToCall.push({
-        objectId: coerceNodeId("ns=1;i=1002"),
-        methodId: nodeID,
-        inputArguments: [{
-            dataType: DataType.String,
-            value: name
-        }]
-    });
-    session.call(methodsToCall, function(err,results){
-        // ....
-    });
-    console.log("Ho chiamato il metodo: " + nodeID);
-    return name
+    var ok = true;
+    var questions = [
+        {
+            type: 'input',
+            name: 'command',
+            message: 'Name the new file node'
+        }
+    ];
+    var risposta = await inquirer.prompt(questions);
+    var oggettoJSON = JSON.stringify(risposta,null,'');
+    var parsedData = JSON.parse(oggettoJSON);
+    var name = parsedData.command;
+
+    if (path.extname(name) != ".txt"){
+        console.log("Sorry, Can't create a non txt File");
+        ok = false;
+    }
+
+    else if (path.extname(name) == ".txt"){
+        const methodsToCall = [];
+        const nodeID = coerceNodeId("ns=1;i=1003");
+        methodsToCall.push({
+            objectId: coerceNodeId("ns=1;i=1002"),
+            methodId: nodeID,
+            inputArguments: [{
+                dataType: DataType.String,
+                value: name
+            }]
+        });
+        session.call(methodsToCall, function(err,results){
+           // ....
+        });
+        console.log("Ho chiamato il metodo: " + nodeID);
+        return name
+    }
+}
+
+async function input(){
+    var risposta;
+    var questions = [
+        {
+            type: 'input',
+            name: 'command',
+            message: 'Avaiable Commands: browse,read,write,upload,exit'
+        }
+    ];
+    risposta = await inquirer.prompt(questions);
+    const oggettoJSON = JSON.stringify(risposta,null,'');
+    var parsedData = JSON.parse(oggettoJSON);
+    return parsedData.command.toLowerCase();
 }
