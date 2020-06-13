@@ -118,7 +118,7 @@ function node_creation(startPath, fileType, folder, folder2, recursive) {
                 organizedBy: organized
             });
             file_transfer.installFileType(myFile, {
-                filename: files[i]
+                filename: filename
             });
         }
         ;

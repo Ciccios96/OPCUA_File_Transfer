@@ -145,7 +145,7 @@ function node_creation(startPath,fileType,folder,folder2,recursive){
         })
 
         file_transfer.installFileType(myFile, { 
-            filename: files[i]
+            filename: filename
         });
         };
     };
