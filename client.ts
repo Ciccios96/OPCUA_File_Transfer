@@ -52,6 +52,9 @@ async function main() {
             case "upload":
                 await call_method(session);
                 break;
+            case "download":
+                await download(session);
+                break;
             case "exit":
                 break;
             default:
@@ -119,26 +122,27 @@ async function read_file(session){
     await clientFile.setPosition(0);
     const data: Buffer = await clientFile.read(byte);
     console.log("Contenuto del file: ", data.toString("utf-8"));
-    var questions = [
+    var question = [
         {
-            type: 'input',
+            type: 'rawlist',
             name: 'command',
-            message: 'Do you want to download it? y/n'
+            message: 'Do you want to download it?',
+            choices: ["yes","no"]
         }
     ];
-    while(risposta != "y" && risposta != "n"){
-        var risposta = await inquirer.prompt(questions);
+    while(risposta != "yes" && risposta != "no"){
+        var risposta = await inquirer.prompt(question);
         const oggettoJSON = JSON.stringify(risposta,null,'');
         var parsedData = JSON.parse(oggettoJSON);
         var risposta = parsedData.command;
         switch(risposta){
-            case "y":
+            case "yes":
                 if(extention == ".txt")
                     download_file(data,StringID);
                 else if (extention == ".pdf")
                     download_PDF(data,StringID);
                 break;
-            case "n":
+            case "no":
                 console.log("I will return to the Main Menu");
                 break;
             default:
@@ -217,9 +221,10 @@ async function call_method(session) {
             message: 'Name the new file node'
         },
         {
-            type: 'input',
+            type: 'rawlist',
             name: 'command2',
-            message: 'Do you want to store it in documents? y/n'
+            message: 'Do you want to store it in documents?',
+            choices: ["yes","no"]
         }
     ];
     var risposta = await inquirer.prompt(questions);
@@ -233,7 +238,7 @@ async function call_method(session) {
         ok = false;
     }
 
-    if(yn != "y" && yn != "n"){
+    if(yn != "yes" && yn != "no"){
         console.log("Sorry, bad input on yes or no");
         ok = false;
     }
@@ -266,14 +271,14 @@ async function call_method(session) {
         await clientFile.open(mode);
     
         if (ok == true){
-            var questions = [
+            var question = [
                 {
                     type: 'input',
                     name: 'command',
                     message: 'What do you want to write in the new node?'
                 }
             ];
-            var risposta = await inquirer.prompt(questions);
+            var risposta = await inquirer.prompt(question);
             oggettoJSON = JSON.stringify(risposta,null,'');
             var parsedData = JSON.parse(oggettoJSON);
             var dato = parsedData.command;
@@ -288,13 +293,46 @@ async function input(){
     var risposta;
     var questions = [
         {
-            type: 'input',
+            type: 'rawlist',
             name: 'command',
-            message: 'Avaiable Commands: browse,read,write,upload,exit'
+            message: 'Avaiable Commands:',
+            choices: ["browse","read","write","upload","download","exit"]
         }
     ];
     risposta = await inquirer.prompt(questions);
     const oggettoJSON = JSON.stringify(risposta,null,'');
     var parsedData = JSON.parse(oggettoJSON);
     return parsedData.command.toLowerCase();
+}
+
+async function download(session){
+    var questions = [
+        {
+            type: 'input',
+            name: 'command',
+            message: 'What node do you want to download?'
+        }
+    ];
+    var risposta = await inquirer.prompt(questions);
+    const oggettoJSON = JSON.stringify(risposta,null,'');
+    var parsedData = JSON.parse(oggettoJSON);
+    var StringID = parsedData.command;
+    var extention = path.extname(StringID);
+    const fileNodeId = new NodeId(NodeIdType.STRING, StringID, 1);
+    const clientFile = new ClientFile(session, fileNodeId);
+    const mode = OpenFileMode.Read;
+
+    await clientFile.open(mode);
+
+    var bytes = await clientFile.size();
+
+    var byte = bytes[1];
+    await clientFile.setPosition(0);
+    const data: Buffer = await clientFile.read(byte);
+
+    if(extention == ".txt")
+    download_file(data,StringID);
+    else if (extention == ".pdf")
+    download_PDF(data,StringID);
+    console.log("File Downloaded");
 }

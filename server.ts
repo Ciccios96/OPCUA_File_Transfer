@@ -84,7 +84,7 @@ function post_initialize() {
 
             var myFile4;
 
-            if (folder == "y"){
+            if (folder == "yes"){
                 myFile4 = fileType.instantiate({
                     nodeId: nodeid,
                     browseName: file_name,

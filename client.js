@@ -62,7 +62,7 @@ function main() {
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    _b.trys.push([0, 18, , 19]);
+                    _b.trys.push([0, 20, , 21]);
                     //  connect to
                     return [4 /*yield*/, connect(endpointUrl)];
                 case 1:
@@ -73,7 +73,7 @@ function main() {
                     session = _b.sent();
                     _b.label = 3;
                 case 3:
-                    if (!(command != "exit")) return [3 /*break*/, 16];
+                    if (!(command != "exit")) return [3 /*break*/, 18];
                     return [4 /*yield*/, input()];
                 case 4:
                     // user input
@@ -84,39 +84,44 @@ function main() {
                         case "read": return [3 /*break*/, 7];
                         case "write": return [3 /*break*/, 9];
                         case "upload": return [3 /*break*/, 11];
-                        case "exit": return [3 /*break*/, 13];
+                        case "download": return [3 /*break*/, 13];
+                        case "exit": return [3 /*break*/, 15];
                     }
-                    return [3 /*break*/, 14];
+                    return [3 /*break*/, 16];
                 case 5: return [4 /*yield*/, browse(session)];
                 case 6:
                     _b.sent();
-                    return [3 /*break*/, 15];
+                    return [3 /*break*/, 17];
                 case 7: return [4 /*yield*/, read_file(session)];
                 case 8:
                     _b.sent();
-                    return [3 /*break*/, 15];
+                    return [3 /*break*/, 17];
                 case 9: return [4 /*yield*/, write_file(session)];
                 case 10:
                     _b.sent();
-                    return [3 /*break*/, 15];
+                    return [3 /*break*/, 17];
                 case 11: return [4 /*yield*/, call_method(session)];
                 case 12:
                     _b.sent();
-                    return [3 /*break*/, 15];
-                case 13: return [3 /*break*/, 15];
+                    return [3 /*break*/, 17];
+                case 13: return [4 /*yield*/, download(session)];
                 case 14:
-                    console.log("Wrong Input, retry");
-                    return [3 /*break*/, 15];
-                case 15: return [3 /*break*/, 3];
-                case 16: return [4 /*yield*/, ending(session)];
-                case 17:
                     _b.sent();
-                    return [3 /*break*/, 19];
-                case 18:
+                    return [3 /*break*/, 17];
+                case 15: return [3 /*break*/, 17];
+                case 16:
+                    console.log("Wrong Input, retry");
+                    return [3 /*break*/, 17];
+                case 17: return [3 /*break*/, 3];
+                case 18: return [4 /*yield*/, ending(session)];
+                case 19:
+                    _b.sent();
+                    return [3 /*break*/, 21];
+                case 20:
                     err_1 = _b.sent();
                     console.log("An error has occured : ", err_1);
-                    return [3 /*break*/, 19];
-                case 19: return [2 /*return*/];
+                    return [3 /*break*/, 21];
+                case 21: return [2 /*return*/];
             }
         });
     });
@@ -177,7 +182,7 @@ function browse(session) {
 }
 function read_file(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var questions, risposta, oggettoJSON, parsedData, StringID, extention, fileNodeId, clientFile, mode, bytes, byte, data, questions, risposta, oggettoJSON_1, parsedData, risposta;
+        var questions, risposta, oggettoJSON, parsedData, StringID, extention, fileNodeId, clientFile, mode, bytes, byte, data, question, risposta, oggettoJSON_1, parsedData, risposta;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -212,30 +217,31 @@ function read_file(session) {
                 case 5:
                     data = _a.sent();
                     console.log("Contenuto del file: ", data.toString("utf-8"));
-                    questions = [
+                    question = [
                         {
-                            type: 'input',
+                            type: 'rawlist',
                             name: 'command',
-                            message: 'Do you want to download it? y/n'
+                            message: 'Do you want to download it?',
+                            choices: ["yes", "no"]
                         }
                     ];
                     _a.label = 6;
                 case 6:
-                    if (!(risposta != "y" && risposta != "n")) return [3 /*break*/, 8];
-                    return [4 /*yield*/, inquirer.prompt(questions)];
+                    if (!(risposta != "yes" && risposta != "no")) return [3 /*break*/, 8];
+                    return [4 /*yield*/, inquirer.prompt(question)];
                 case 7:
                     risposta = _a.sent();
                     oggettoJSON_1 = JSON.stringify(risposta, null, '');
                     parsedData = JSON.parse(oggettoJSON_1);
                     risposta = parsedData.command;
                     switch (risposta) {
-                        case "y":
+                        case "yes":
                             if (extention == ".txt")
                                 download_file(data, StringID);
                             else if (extention == ".pdf")
                                 download_PDF(data, StringID);
                             break;
-                        case "n":
+                        case "no":
                             console.log("I will return to the Main Menu");
                             break;
                         default:
@@ -355,7 +361,7 @@ function ending(session) {
 }
 function call_method(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var ok, questions, risposta, oggettoJSON, parsedData, name, yn, methodsToCall, nodeID, fileNodeId, clientFile, mode, questions, risposta, parsedData, dato, dataToWrite;
+        var ok, questions, risposta, oggettoJSON, parsedData, name, yn, methodsToCall, nodeID, fileNodeId, clientFile, mode, question, risposta, parsedData, dato, dataToWrite;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -367,9 +373,10 @@ function call_method(session) {
                             message: 'Name the new file node'
                         },
                         {
-                            type: 'input',
+                            type: 'rawlist',
                             name: 'command2',
-                            message: 'Do you want to store it in documents? y/n'
+                            message: 'Do you want to store it in documents?',
+                            choices: ["yes", "no"]
                         }
                     ];
                     return [4 /*yield*/, inquirer.prompt(questions)];
@@ -383,7 +390,7 @@ function call_method(session) {
                         console.log("Sorry, Can't create a non txt File");
                         ok = false;
                     }
-                    if (yn != "y" && yn != "n") {
+                    if (yn != "yes" && yn != "no") {
                         console.log("Sorry, bad input on yes or no");
                         ok = false;
                     }
@@ -414,14 +421,14 @@ function call_method(session) {
                 case 2:
                     _a.sent();
                     if (!(ok == true)) return [3 /*break*/, 5];
-                    questions = [
+                    question = [
                         {
                             type: 'input',
                             name: 'command',
                             message: 'What do you want to write in the new node?'
                         }
                     ];
-                    return [4 /*yield*/, inquirer.prompt(questions)];
+                    return [4 /*yield*/, inquirer.prompt(question)];
                 case 3:
                     risposta = _a.sent();
                     oggettoJSON = JSON.stringify(risposta, null, '');
@@ -445,9 +452,10 @@ function input() {
                 case 0:
                     questions = [
                         {
-                            type: 'input',
+                            type: 'rawlist',
                             name: 'command',
-                            message: 'Avaiable Commands: browse,read,write,upload,exit'
+                            message: 'Avaiable Commands:',
+                            choices: ["browse", "read", "write", "upload", "download", "exit"]
                         }
                     ];
                     return [4 /*yield*/, inquirer.prompt(questions)];
@@ -456,6 +464,52 @@ function input() {
                     oggettoJSON = JSON.stringify(risposta, null, '');
                     parsedData = JSON.parse(oggettoJSON);
                     return [2 /*return*/, parsedData.command.toLowerCase()];
+            }
+        });
+    });
+}
+function download(session) {
+    return __awaiter(this, void 0, void 0, function () {
+        var questions, risposta, oggettoJSON, parsedData, StringID, extention, fileNodeId, clientFile, mode, bytes, byte, data;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    questions = [
+                        {
+                            type: 'input',
+                            name: 'command',
+                            message: 'What node do you want to download?'
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(questions)];
+                case 1:
+                    risposta = _a.sent();
+                    oggettoJSON = JSON.stringify(risposta, null, '');
+                    parsedData = JSON.parse(oggettoJSON);
+                    StringID = parsedData.command;
+                    extention = path.extname(StringID);
+                    fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, StringID, 1);
+                    clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
+                    mode = node_opcua_file_transfer_1.OpenFileMode.Read;
+                    return [4 /*yield*/, clientFile.open(mode)];
+                case 2:
+                    _a.sent();
+                    return [4 /*yield*/, clientFile.size()];
+                case 3:
+                    bytes = _a.sent();
+                    byte = bytes[1];
+                    return [4 /*yield*/, clientFile.setPosition(0)];
+                case 4:
+                    _a.sent();
+                    return [4 /*yield*/, clientFile.read(byte)];
+                case 5:
+                    data = _a.sent();
+                    if (extention == ".txt")
+                        download_file(data, StringID);
+                    else if (extention == ".pdf")
+                        download_PDF(data, StringID);
+                    console.log("File Downloaded");
+                    return [2 /*return*/];
             }
         });
     });
