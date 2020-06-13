@@ -5,6 +5,7 @@ var opcua = require("node-opcua");
 var util = require("util");
 var fs = require("fs");
 var file_transfer = require("node-opcua-file-transfer");
+var path = require('path');
 var util_1 = require("util");
 // Let's create an instance of OPCUAServer
 var server = new opcua.OPCUAServer({
@@ -19,8 +20,7 @@ var server = new opcua.OPCUAServer({
 function post_initialize() {
     console.log("initialized");
     function construct_my_address_space(server) {
-        var my_data_filename1 = "./server_files/Document_File.txt";
-        var my_data_filename2 = "./server_files/prova.pdf";
+        var startPath = "./server_files";
         var addressSpace = server.engine.addressSpace;
         var namespace = addressSpace.getOwnNamespace();
         //creazione folders
@@ -33,34 +33,13 @@ function post_initialize() {
         //instanzio il fileType
         var fileType = addressSpace.findObjectType("FileType");
         //creo i vari nodi filetype
-        var myFile = fileType.instantiate({
-            nodeId: "s=MyFile.txt",
-            browseName: "MyFile.txt",
-            organizedBy: FileSystem
-        });
-        file_transfer.installFileType(myFile, {
-            filename: my_data_filename1
-        });
-        var myFile2 = fileType.instantiate({
-            nodeId: "s=Document_File.txt",
-            browseName: "Document_File.txt",
-            organizedBy: Documents
-        });
-        file_transfer.installFileType(myFile2, {
-            filename: my_data_filename1
-        });
-        var myFile3 = fileType.instantiate({
-            nodeId: "s=PDF_File.pdf",
-            browseName: "PDF_File.pdf",
-            organizedBy: FileSystem
-        });
-        file_transfer.installFileType(myFile3, {
-            filename: my_data_filename2
-        });
+        node_creation(startPath, fileType, FileSystem, Documents, false);
+        //oggetto per ospitare il metodo
         var objectFile = namespace.addObject({
             organizedBy: FileSystem,
             browseName: "ObjectFile"
         });
+        //creazione metodo
         var method = namespace.addMethod(objectFile, {
             browseName: "createFile",
             inputArguments: [
@@ -119,3 +98,31 @@ function post_initialize() {
     });
 }
 server.initialize(post_initialize);
+function node_creation(startPath, fileType, folder, folder2, recursive) {
+    var files = fs.readdirSync(startPath);
+    if (recursive == true) {
+        var organized = folder2;
+    }
+    else
+        var organized = folder;
+    for (var i = 0; i < files.length; i++) {
+        var filename = path.join(startPath, files[i]);
+        var stat = fs.lstatSync(filename);
+        if (stat.isDirectory()) {
+            node_creation(filename, fileType, folder, folder2, true);
+        }
+        else {
+            var myFile = fileType.instantiate({
+                nodeId: "s=" + files[i],
+                browseName: files[i],
+                organizedBy: organized
+            });
+            file_transfer.installFileType(myFile, {
+                filename: files[i]
+            });
+        }
+        ;
+    }
+    ;
+}
+;

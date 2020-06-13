@@ -3,6 +3,7 @@ const opcua = require("node-opcua");
 const util = require("util");
 const fs = require("fs");
 const file_transfer = require("node-opcua-file-transfer");
+const path = require('path');
 import {promisify} from "util";
 
 // Let's create an instance of OPCUAServer
@@ -21,9 +22,7 @@ function post_initialize() {
 
     function construct_my_address_space(server) {
 
-        const my_data_filename1 = "./server_files/Document_File.txt";
-        const my_data_filename2 = "./server_files/prova.pdf";
-        const my_data_filename3 = "./server_files/MyFile.txt"
+        var startPath = "./server_files";
     
         const addressSpace = server.engine.addressSpace;
         const namespace = addressSpace.getOwnNamespace();
@@ -42,41 +41,15 @@ function post_initialize() {
         const fileType = addressSpace.findObjectType("FileType");
 
         //creo i vari nodi filetype
-        const myFile = fileType.instantiate({
-            nodeId: "s=MyFile.txt",
-            browseName: "MyFile.txt",
-            organizedBy: FileSystem
-        })
 
-        file_transfer.installFileType(myFile, { 
-            filename: my_data_filename3
-        });
+        node_creation(startPath,fileType,FileSystem,Documents,false);
 
-        const myFile2 = fileType.instantiate({
-            nodeId: "s=Document_File.txt",
-            browseName: "Document_File.txt",
-            organizedBy: Documents
-        })
-
-        file_transfer.installFileType(myFile2, { 
-            filename: my_data_filename1
-        });  
-        
-        const myFile3 = fileType.instantiate({
-            nodeId: "s=PDF_File.pdf",
-            browseName: "PDF_File.pdf",
-            organizedBy: FileSystem
-        })
-
-        file_transfer.installFileType(myFile3, { 
-            filename: my_data_filename2
-        }); 
-
+        //oggetto per ospitare il metodo
         const objectFile = namespace.addObject({
             organizedBy: FileSystem,
             browseName: "ObjectFile"
         });
-
+        //creazione metodo
         const method = namespace.addMethod(objectFile,{
 
             browseName: "createFile",
@@ -151,3 +124,29 @@ function post_initialize() {
 
 }
 server.initialize(post_initialize);
+
+function node_creation(startPath,fileType,folder,folder2,recursive){
+    var files=fs.readdirSync(startPath);
+    if (recursive == true){
+        var organized = folder2
+    }
+    else var organized = folder
+    for(var i=0;i<files.length;i++){
+        var filename=path.join(startPath,files[i]);
+        var stat = fs.lstatSync(filename);
+        if (stat.isDirectory()){
+            node_creation(filename,fileType,folder,folder2,true);
+        }
+        else {
+            const myFile = fileType.instantiate({
+            nodeId: "s=" + files[i],
+            browseName: files[i],
+            organizedBy: organized
+        })
+
+        file_transfer.installFileType(myFile, { 
+            filename: files[i]
+        });
+        };
+    };
+};
