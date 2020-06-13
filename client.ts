@@ -79,9 +79,16 @@ async function create_session(){
 }
 
 async function browse(session){
-    const browseResult = await session.browse("ns=1;i=1000");
+    var browseResult = await session.browse("ns=1;i=1000");
      
     console.log("References of FileSystem :");
+    for(const reference of browseResult.references) {
+        console.log( "   -> ", reference.browseName.toString());
+    }
+
+    browseResult = await session.browse("ns=1;i=1001");
+     
+    console.log("References of Documents :");
     for(const reference of browseResult.references) {
         console.log( "   -> ", reference.browseName.toString());
     }
@@ -127,9 +134,9 @@ async function read_file(session){
         switch(risposta){
             case "y":
                 if(extention == ".txt")
-                    download_file(data);
+                    download_file(data,StringID);
                 else if (extention == ".pdf")
-                    download_PDF(data);
+                    download_PDF(data,StringID);
                 break;
             case "n":
                 console.log("I will return to the Main Menu");
@@ -141,13 +148,13 @@ async function read_file(session){
     }
 }
 
-async function download_file(data){
-    const my_data_filename = "./downloads/someFile.txt";
+async function download_file(data,StringID){
+    const my_data_filename = "./downloads/" + StringID;
     await promisify(fs.writeFile)(my_data_filename, data.toString("utf-8"), "utf8");
 }
 
-async function download_PDF(data){
-    const my_data_filename = "./downloads/someFile.pdf";
+async function download_PDF(data,StringID){
+    const my_data_filename = "./downloads/" + StringID;
     await promisify(fs.writeFile)(my_data_filename, data, "binary");
 }
 
@@ -208,19 +215,30 @@ async function call_method(session) {
             type: 'input',
             name: 'command',
             message: 'Name the new file node'
+        },
+        {
+            type: 'input',
+            name: 'command2',
+            message: 'Do you want to store it in documents? y/n'
         }
     ];
     var risposta = await inquirer.prompt(questions);
     var oggettoJSON = JSON.stringify(risposta,null,'');
     var parsedData = JSON.parse(oggettoJSON);
     var name = parsedData.command;
+    var yn = parsedData.command2;
 
     if (path.extname(name) != ".txt"){
         console.log("Sorry, Can't create a non txt File");
         ok = false;
     }
 
-    else if (path.extname(name) == ".txt"){
+    if(yn != "y" && yn != "n"){
+        console.log("Sorry, bad input on yes or no");
+        ok = false;
+    }
+
+    if (ok == true){
         const methodsToCall = [];
         const nodeID = coerceNodeId("ns=1;i=1003");
         methodsToCall.push({
@@ -229,13 +247,40 @@ async function call_method(session) {
             inputArguments: [{
                 dataType: DataType.String,
                 value: name
+            },{
+                dataType: DataType.String,
+                value:yn
             }]
         });
         session.call(methodsToCall, function(err,results){
-           // ....
+           if (err){
+               console.log(err);
+           }
         });
-        console.log("Ho chiamato il metodo: " + nodeID);
-        return name
+        console.log("I have called the method: " + nodeID);
+
+        const fileNodeId = new NodeId(NodeIdType.STRING, name, 1);
+        const clientFile = new ClientFile(session, fileNodeId);
+        const mode = OpenFileMode.WriteAppend;
+    
+        await clientFile.open(mode);
+    
+        if (ok == true){
+            var questions = [
+                {
+                    type: 'input',
+                    name: 'command',
+                    message: 'What do you want to write in the new node?'
+                }
+            ];
+            var risposta = await inquirer.prompt(questions);
+            oggettoJSON = JSON.stringify(risposta,null,'');
+            var parsedData = JSON.parse(oggettoJSON);
+            var dato = parsedData.command;
+        
+            const dataToWrite = Buffer.from(dato);
+            await clientFile.write(dataToWrite);
+        }
     }
 }
 

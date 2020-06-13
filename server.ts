@@ -21,9 +21,9 @@ function post_initialize() {
 
     function construct_my_address_space(server) {
 
-        const my_data_filename1 = "./server_files/file.txt";
+        const my_data_filename1 = "./server_files/Document_File.txt";
         const my_data_filename2 = "./server_files/prova.pdf";
-        const my_data_filename3 = "./server_files/dummy.txt";
+        const my_data_filename3 = "./server_files/MyFile.txt"
     
         const addressSpace = server.engine.addressSpace;
         const namespace = addressSpace.getOwnNamespace();
@@ -49,7 +49,7 @@ function post_initialize() {
         })
 
         file_transfer.installFileType(myFile, { 
-            filename: my_data_filename1
+            filename: my_data_filename3
         });
 
         const myFile2 = fileType.instantiate({
@@ -86,6 +86,11 @@ function post_initialize() {
                     name:"filename",
                     description: { text: "specifies the name of the File" },
                     dataType: opcua.DataType.String        
+                },
+                {
+                    name:"folder",
+                    description: { text: "specifies if the node must be in the FileSystem or Documents"},
+                    dataType: opcua.DataType.String
                 }
              ],
         
@@ -95,6 +100,7 @@ function post_initialize() {
         method.bindMethod((inputArguments,context,callback) => {
 
             const file_name = inputArguments[0].value;
+            const folder = inputArguments[1].value;
         
             console.log("Hello World ! I will create a file named ",file_name);
 
@@ -103,11 +109,22 @@ function post_initialize() {
             const my_data_filename3 = "./server_files/"+ file_name;
             promisify(fs.writeFile)(my_data_filename3,"", "utf8");
 
-            const myFile4 = fileType.instantiate({
-                nodeId: nodeid,
-                browseName: file_name,
-                organizedBy: FileSystem
-            })
+            var myFile4;
+
+            if (folder == "y"){
+                myFile4 = fileType.instantiate({
+                    nodeId: nodeid,
+                    browseName: file_name,
+                    organizedBy: Documents
+                })
+            }
+            else {
+                myFile4 = fileType.instantiate({
+                    nodeId: nodeid,
+                    browseName: file_name,
+                    organizedBy: FileSystem
+                })
+            }
     
             file_transfer.installFileType(myFile4, { 
                 filename: my_data_filename3

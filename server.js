@@ -19,9 +19,8 @@ var server = new opcua.OPCUAServer({
 function post_initialize() {
     console.log("initialized");
     function construct_my_address_space(server) {
-        var my_data_filename1 = "./server_files/file.txt";
+        var my_data_filename1 = "./server_files/Document_File.txt";
         var my_data_filename2 = "./server_files/prova.pdf";
-        var my_data_filename3 = "./server_files/dummy.txt";
         var addressSpace = server.engine.addressSpace;
         var namespace = addressSpace.getOwnNamespace();
         //creazione folders
@@ -69,21 +68,37 @@ function post_initialize() {
                     name: "filename",
                     description: { text: "specifies the name of the File" },
                     dataType: opcua.DataType.String
+                },
+                {
+                    name: "folder",
+                    description: { text: "specifies if the node must be in the FileSystem or Documents" },
+                    dataType: opcua.DataType.String
                 }
             ],
             outputArguments: []
         });
         method.bindMethod(function (inputArguments, context, callback) {
             var file_name = inputArguments[0].value;
+            var folder = inputArguments[1].value;
             console.log("Hello World ! I will create a file named ", file_name);
             var nodeid = "s=" + file_name;
             var my_data_filename3 = "./server_files/" + file_name;
             util_1.promisify(fs.writeFile)(my_data_filename3, "", "utf8");
-            var myFile4 = fileType.instantiate({
-                nodeId: nodeid,
-                browseName: file_name,
-                organizedBy: FileSystem
-            });
+            var myFile4;
+            if (folder == "y") {
+                myFile4 = fileType.instantiate({
+                    nodeId: nodeid,
+                    browseName: file_name,
+                    organizedBy: Documents
+                });
+            }
+            else {
+                myFile4 = fileType.instantiate({
+                    nodeId: nodeid,
+                    browseName: file_name,
+                    organizedBy: FileSystem
+                });
+            }
             file_transfer.installFileType(myFile4, {
                 filename: my_data_filename3
             });
