@@ -47,100 +47,232 @@ var connectionStrategy = {
     initialDelay: 1000,
     maxRetry: 1
 };
-var options = {
-    applicationName: "MyClient",
-    connectionStrategy: connectionStrategy,
-    securityMode: node_opcua_1.MessageSecurityMode.None,
-    securityPolicy: node_opcua_1.SecurityPolicy.None,
-    endpoint_must_exist: false
-};
-var client = node_opcua_1.OPCUAClient.create(options);
-var endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
+//const endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
+console.log(require("os").hostname());
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var session, _a, err_1;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var question1, risposta, oggettoJSON, parsedData, address, question2, risposta, oggettoJSON2, parsedData, endpointURL, secPolicy_question, risposta, oggettoJSON3, parsedData, secMode, _a, secPolicy_question, risposta, oggettoJSON_1, parsedData, secPolicy, secPolicy_question, risposta, oggettoJSON2_1, parsedData, secPolicy, secPolicy_question, risposta, oggettoJSON3_1, parsedData, secPolicy, options, client, session, _b, err_1;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
                 case 0:
-                    _b.trys.push([0, 20, , 21]);
-                    //  connect to
-                    return [4 /*yield*/, connect(endpointUrl)];
+                    _c.trys.push([0, 31, , 32]);
+                    question1 = [
+                        {
+                            type: 'input',
+                            name: 'address_server',
+                            message: "Enter Server HostName:"
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(question1)];
                 case 1:
-                    //  connect to
-                    _b.sent();
-                    return [4 /*yield*/, create_session()];
+                    risposta = _c.sent();
+                    oggettoJSON = JSON.stringify(risposta, null, ' ');
+                    parsedData = JSON.parse(oggettoJSON);
+                    address = parsedData.address_server;
+                    question2 = [
+                        {
+                            type: 'input',
+                            name: 'server_endpoint',
+                            message: "Enter server URL endpoint:"
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(question2)];
                 case 2:
-                    session = _b.sent();
-                    _b.label = 3;
+                    risposta = _c.sent();
+                    oggettoJSON2 = JSON.stringify(risposta, null, ' ');
+                    parsedData = JSON.parse(oggettoJSON2);
+                    endpointURL = parsedData.server_endpoint;
+                    secPolicy_question = [
+                        {
+                            type: 'rawlist',
+                            name: 'command',
+                            message: 'Select a securityMode:',
+                            choices: ['1 - None', '2 - Sign', '3 - SignAndEncrypt']
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(secPolicy_question)];
                 case 3:
-                    if (!(command != "exit")) return [3 /*break*/, 18];
-                    return [4 /*yield*/, input()];
-                case 4:
-                    // user input
-                    command = _b.sent();
-                    _a = command;
+                    risposta = _c.sent();
+                    oggettoJSON3 = JSON.stringify(risposta, null, ' ');
+                    parsedData = JSON.parse(oggettoJSON3);
+                    secMode = parsedData.command;
+                    _a = secMode;
                     switch (_a) {
-                        case "browse": return [3 /*break*/, 5];
-                        case "read": return [3 /*break*/, 7];
-                        case "write": return [3 /*break*/, 9];
-                        case "upload": return [3 /*break*/, 11];
-                        case "download": return [3 /*break*/, 13];
-                        case "exit": return [3 /*break*/, 15];
+                        case "1 - None": return [3 /*break*/, 4];
+                        case "2 - Sign": return [3 /*break*/, 6];
+                        case "3 - SignAndEncrypt": return [3 /*break*/, 8];
                     }
-                    return [3 /*break*/, 16];
-                case 5: return [4 /*yield*/, browse(session)];
+                    return [3 /*break*/, 10];
+                case 4:
+                    secPolicy_question = [
+                        {
+                            type: 'rawlist',
+                            name: 'command',
+                            message: 'Select a Security Policy:',
+                            choices: ['None']
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(secPolicy_question)];
+                case 5:
+                    risposta = _c.sent();
+                    oggettoJSON_1 = JSON.stringify(risposta, null, ' ');
+                    parsedData = JSON.parse(oggettoJSON_1);
+                    secPolicy = parsedData.command;
+                    return [3 /*break*/, 11];
                 case 6:
-                    _b.sent();
-                    return [3 /*break*/, 17];
-                case 7: return [4 /*yield*/, read_file(session)];
+                    secPolicy_question = [
+                        {
+                            type: 'rawlist',
+                            name: 'command',
+                            message: 'Select a Security Policy:',
+                            choices: ['Basic128Rsa15', 'Basic256', 'Basic256Sha256']
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(secPolicy_question)];
+                case 7:
+                    risposta = _c.sent();
+                    oggettoJSON2_1 = JSON.stringify(risposta, null, ' ');
+                    parsedData = JSON.parse(oggettoJSON2_1);
+                    secPolicy = parsedData.command;
+                    return [3 /*break*/, 11];
                 case 8:
-                    _b.sent();
-                    return [3 /*break*/, 17];
-                case 9: return [4 /*yield*/, write_file(session)];
+                    secPolicy_question = [
+                        {
+                            type: 'rawlist',
+                            name: 'command',
+                            message: 'Select a Security Policy:',
+                            choices: ['Basic128Rsa15', 'Basic256', 'Basic256Sha256']
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(secPolicy_question)];
+                case 9:
+                    risposta = _c.sent();
+                    oggettoJSON3_1 = JSON.stringify(risposta, null, ' ');
+                    parsedData = JSON.parse(oggettoJSON3_1);
+                    secPolicy = parsedData.command;
+                    return [3 /*break*/, 11];
                 case 10:
-                    _b.sent();
-                    return [3 /*break*/, 17];
-                case 11: return [4 /*yield*/, call_method(session)];
+                    console.log("Errore...");
+                    _c.label = 11;
+                case 11:
+                    if (secMode == "1 - None") {
+                        secMode = node_opcua_1.MessageSecurityMode.None;
+                    }
+                    else if (secMode == "2 - Sign") {
+                        secMode = node_opcua_1.MessageSecurityMode.Sign;
+                    }
+                    else {
+                        secMode = node_opcua_1.MessageSecurityMode.SignAndEncrypt;
+                    }
+                    if (secPolicy == "None") {
+                        secPolicy = node_opcua_1.SecurityPolicy.None;
+                    }
+                    else if (secPolicy == "Basic128Rsa15") {
+                        secPolicy = node_opcua_1.SecurityPolicy.Basic128Rsa15;
+                    }
+                    else if (secPolicy == "Basic256") {
+                        secPolicy = node_opcua_1.SecurityPolicy.Basic256;
+                    }
+                    else if (secPolicy == "Basic256Sha256") {
+                        secPolicy = node_opcua_1.SecurityPolicy.Basic256Sha256;
+                    }
+                    options = {
+                        applicationName: "MyClient",
+                        connectionStrategy: connectionStrategy,
+                        securityMode: secMode,
+                        securityPolicy: secPolicy,
+                        endpoint_must_exist: false
+                    };
+                    client = node_opcua_1.OPCUAClient.create(options);
+                    endpointURL = "opc.tcp://" + address + ":" + endpointURL;
+                    //  connect to
+                    return [4 /*yield*/, connect(endpointURL, client)];
                 case 12:
-                    _b.sent();
-                    return [3 /*break*/, 17];
-                case 13: return [4 /*yield*/, download(session)];
+                    //  connect to
+                    _c.sent();
+                    return [4 /*yield*/, create_session(client)];
+                case 13:
+                    session = _c.sent();
+                    _c.label = 14;
                 case 14:
-                    _b.sent();
-                    return [3 /*break*/, 17];
-                case 15: return [3 /*break*/, 17];
-                case 16:
-                    console.log("Wrong Input, retry");
-                    return [3 /*break*/, 17];
-                case 17: return [3 /*break*/, 3];
-                case 18: return [4 /*yield*/, ending(session)];
+                    if (!(command != "exit")) return [3 /*break*/, 29];
+                    return [4 /*yield*/, input()];
+                case 15:
+                    // user input
+                    command = _c.sent();
+                    _b = command;
+                    switch (_b) {
+                        case "browse": return [3 /*break*/, 16];
+                        case "read": return [3 /*break*/, 18];
+                        case "write": return [3 /*break*/, 20];
+                        case "upload": return [3 /*break*/, 22];
+                        case "download": return [3 /*break*/, 24];
+                        case "exit": return [3 /*break*/, 26];
+                    }
+                    return [3 /*break*/, 27];
+                case 16: return [4 /*yield*/, browse(session)];
+                case 17:
+                    _c.sent();
+                    return [3 /*break*/, 28];
+                case 18: return [4 /*yield*/, read_file(session)];
                 case 19:
-                    _b.sent();
-                    return [3 /*break*/, 21];
-                case 20:
-                    err_1 = _b.sent();
+                    _c.sent();
+                    return [3 /*break*/, 28];
+                case 20: return [4 /*yield*/, write_file(session)];
+                case 21:
+                    _c.sent();
+                    return [3 /*break*/, 28];
+                case 22: return [4 /*yield*/, call_method(session)];
+                case 23:
+                    _c.sent();
+                    return [3 /*break*/, 28];
+                case 24: return [4 /*yield*/, download(session)];
+                case 25:
+                    _c.sent();
+                    return [3 /*break*/, 28];
+                case 26: return [3 /*break*/, 28];
+                case 27:
+                    console.log("Wrong Input, retry");
+                    return [3 /*break*/, 28];
+                case 28: return [3 /*break*/, 14];
+                case 29: return [4 /*yield*/, ending(session, client)];
+                case 30:
+                    _c.sent();
+                    return [3 /*break*/, 32];
+                case 31:
+                    err_1 = _c.sent();
                     console.log("An error has occured : ", err_1);
-                    return [3 /*break*/, 21];
-                case 21: return [2 /*return*/];
+                    return [3 /*break*/, 32];
+                case 32: return [2 /*return*/];
             }
         });
     });
 }
 main();
-function connect(endpoint) {
+function connect(endpoint, client) {
     return __awaiter(this, void 0, void 0, function () {
+        var err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, client.connect(endpoint)];
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, client.connect(endpoint)];
                 case 1:
                     _a.sent();
                     console.log("Client connected!");
-                    return [2 /*return*/];
+                    return [3 /*break*/, 3];
+                case 2:
+                    err_2 = _a.sent();
+                    console.log("Cannot connect to endpoint:", endpoint);
+                    console.log("retry");
+                    process.exit(0);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
         });
     });
 }
-function create_session() {
+function create_session(client) {
     return __awaiter(this, void 0, void 0, function () {
         var session;
         return __generator(this, function (_a) {
@@ -182,7 +314,7 @@ function browse(session) {
 }
 function read_file(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var questions, risposta, oggettoJSON, parsedData, StringID, extention, fileNodeId, clientFile, mode, bytes, byte, data, question, risposta, oggettoJSON_1, parsedData, risposta;
+        var questions, risposta, oggettoJSON, parsedData, StringID, extention, browseResult, fileNodeId, clientFile, mode, bytes, byte, data, question, risposta, oggettoJSON_2, parsedData, risposta;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -200,21 +332,28 @@ function read_file(session) {
                     parsedData = JSON.parse(oggettoJSON);
                     StringID = parsedData.command;
                     extention = path.extname(StringID);
+                    return [4 /*yield*/, session.browse("ns=1;s=" + StringID)];
+                case 2:
+                    browseResult = _a.sent();
+                    if ((browseResult.references).length == 0) {
+                        console.log("Error, file does not exists!");
+                        return [2 /*return*/];
+                    }
                     fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, StringID, 1);
                     clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
                     mode = node_opcua_file_transfer_1.OpenFileMode.Read;
                     return [4 /*yield*/, clientFile.open(mode)];
-                case 2:
+                case 3:
                     _a.sent();
                     return [4 /*yield*/, clientFile.size()];
-                case 3:
+                case 4:
                     bytes = _a.sent();
                     byte = bytes[1];
                     return [4 /*yield*/, clientFile.setPosition(0)];
-                case 4:
+                case 5:
                     _a.sent();
                     return [4 /*yield*/, clientFile.read(byte)];
-                case 5:
+                case 6:
                     data = _a.sent();
                     console.log("Contenuto del file: ", data.toString("utf-8"));
                     question = [
@@ -225,14 +364,14 @@ function read_file(session) {
                             choices: ["yes", "no"]
                         }
                     ];
-                    _a.label = 6;
-                case 6:
-                    if (!(risposta != "yes" && risposta != "no")) return [3 /*break*/, 8];
-                    return [4 /*yield*/, inquirer.prompt(question)];
+                    _a.label = 7;
                 case 7:
+                    if (!(risposta != "yes" && risposta != "no")) return [3 /*break*/, 9];
+                    return [4 /*yield*/, inquirer.prompt(question)];
+                case 8:
                     risposta = _a.sent();
-                    oggettoJSON_1 = JSON.stringify(risposta, null, '');
-                    parsedData = JSON.parse(oggettoJSON_1);
+                    oggettoJSON_2 = JSON.stringify(risposta, null, '');
+                    parsedData = JSON.parse(oggettoJSON_2);
                     risposta = parsedData.command;
                     switch (risposta) {
                         case "yes":
@@ -248,8 +387,8 @@ function read_file(session) {
                             console.log("Wrong Input");
                             break;
                     }
-                    return [3 /*break*/, 6];
-                case 8: return [2 /*return*/];
+                    return [3 /*break*/, 7];
+                case 9: return [2 /*return*/];
             }
         });
     });
@@ -286,11 +425,10 @@ function download_PDF(data, StringID) {
 }
 function write_file(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var ok, questions, risposta, oggettoJSON, parsedData, StringID, fileNodeId, clientFile, mode, questions, risposta, parsedData, dato, dataToWrite;
+        var questions, risposta, oggettoJSON, parsedData, StringID, browseResult, fileNodeId, clientFile, mode, questions, risposta, parsedData, dato, dataToWrite;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    ok = true;
                     questions = [
                         {
                             type: 'input',
@@ -306,15 +444,21 @@ function write_file(session) {
                     StringID = parsedData.command;
                     if (path.extname(StringID) != ".txt") {
                         console.log("Sorry, Can't Write a non txt File");
-                        ok = false;
+                        return [2 /*return*/];
+                    }
+                    return [4 /*yield*/, session.browse("ns=1;s=" + StringID)];
+                case 2:
+                    browseResult = _a.sent();
+                    if ((browseResult.references).length == 0) {
+                        console.log("Error, file does not exists!");
+                        return [2 /*return*/];
                     }
                     fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, StringID, 1);
                     clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
                     mode = node_opcua_file_transfer_1.OpenFileMode.WriteAppend;
                     return [4 /*yield*/, clientFile.open(mode)];
-                case 2:
+                case 3:
                     _a.sent();
-                    if (!(ok == true)) return [3 /*break*/, 5];
                     questions = [
                         {
                             type: 'input',
@@ -323,22 +467,21 @@ function write_file(session) {
                         }
                     ];
                     return [4 /*yield*/, inquirer.prompt(questions)];
-                case 3:
+                case 4:
                     risposta = _a.sent();
                     oggettoJSON = JSON.stringify(risposta, null, '');
                     parsedData = JSON.parse(oggettoJSON);
                     dato = parsedData.command;
                     dataToWrite = Buffer.from(dato);
                     return [4 /*yield*/, clientFile.write(dataToWrite)];
-                case 4:
+                case 5:
                     _a.sent();
-                    _a.label = 5;
-                case 5: return [2 /*return*/];
+                    return [2 /*return*/];
             }
         });
     });
 }
-function ending(session) {
+function ending(session, client) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -361,11 +504,10 @@ function ending(session) {
 }
 function call_method(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var ok, questions, risposta, oggettoJSON, parsedData, name, yn, methodsToCall, nodeID, fileNodeId, clientFile, mode, question, risposta, parsedData, dato, dataToWrite;
+        var questions, risposta, oggettoJSON, parsedData, name, yn, browseResult, methodsToCall, nodeID, fileNodeId, clientFile, mode, question, risposta, parsedData, dato, dataToWrite;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    ok = true;
                     questions = [
                         {
                             type: 'input',
@@ -388,13 +530,19 @@ function call_method(session) {
                     yn = parsedData.command2;
                     if (path.extname(name) != ".txt") {
                         console.log("Sorry, Can't create a non txt File");
-                        ok = false;
+                        return [2 /*return*/];
                     }
                     if (yn != "yes" && yn != "no") {
                         console.log("Sorry, bad input on yes or no");
-                        ok = false;
+                        return [2 /*return*/];
                     }
-                    if (!(ok == true)) return [3 /*break*/, 5];
+                    return [4 /*yield*/, session.browse("ns=1;s=" + name)];
+                case 2:
+                    browseResult = _a.sent();
+                    if ((browseResult.references).length > 0) {
+                        console.log("Error, a file named like this alredy exist!");
+                        return [2 /*return*/];
+                    }
                     methodsToCall = [];
                     nodeID = node_opcua_1.coerceNodeId("ns=1;i=1003");
                     methodsToCall.push({
@@ -418,9 +566,8 @@ function call_method(session) {
                     clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
                     mode = node_opcua_file_transfer_1.OpenFileMode.WriteAppend;
                     return [4 /*yield*/, clientFile.open(mode)];
-                case 2:
+                case 3:
                     _a.sent();
-                    if (!(ok == true)) return [3 /*break*/, 5];
                     question = [
                         {
                             type: 'input',
@@ -429,17 +576,16 @@ function call_method(session) {
                         }
                     ];
                     return [4 /*yield*/, inquirer.prompt(question)];
-                case 3:
+                case 4:
                     risposta = _a.sent();
                     oggettoJSON = JSON.stringify(risposta, null, '');
                     parsedData = JSON.parse(oggettoJSON);
                     dato = parsedData.command;
                     dataToWrite = Buffer.from(dato);
                     return [4 /*yield*/, clientFile.write(dataToWrite)];
-                case 4:
+                case 5:
                     _a.sent();
-                    _a.label = 5;
-                case 5: return [2 /*return*/];
+                    return [2 /*return*/];
             }
         });
     });
@@ -470,7 +616,7 @@ function input() {
 }
 function download(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var questions, risposta, oggettoJSON, parsedData, StringID, extention, fileNodeId, clientFile, mode, bytes, byte, data;
+        var questions, risposta, oggettoJSON, parsedData, StringID, extention, browseResult, fileNodeId, clientFile, mode, bytes, byte, data;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -488,21 +634,28 @@ function download(session) {
                     parsedData = JSON.parse(oggettoJSON);
                     StringID = parsedData.command;
                     extention = path.extname(StringID);
+                    return [4 /*yield*/, session.browse("ns=1;s=" + StringID)];
+                case 2:
+                    browseResult = _a.sent();
+                    if ((browseResult.references).length == 0) {
+                        console.log("Error, file does not exists!");
+                        return [2 /*return*/];
+                    }
                     fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, StringID, 1);
                     clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
                     mode = node_opcua_file_transfer_1.OpenFileMode.Read;
                     return [4 /*yield*/, clientFile.open(mode)];
-                case 2:
+                case 3:
                     _a.sent();
                     return [4 /*yield*/, clientFile.size()];
-                case 3:
+                case 4:
                     bytes = _a.sent();
                     byte = bytes[1];
                     return [4 /*yield*/, clientFile.setPosition(0)];
-                case 4:
+                case 5:
                     _a.sent();
                     return [4 /*yield*/, clientFile.read(byte)];
-                case 5:
+                case 6:
                     data = _a.sent();
                     if (extention == ".txt")
                         download_file(data, StringID);

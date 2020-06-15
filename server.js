@@ -61,28 +61,29 @@ function post_initialize() {
             var folder = inputArguments[1].value;
             console.log("Hello World ! I will create a file named ", file_name);
             var nodeid = "s=" + file_name;
-            var my_data_filename3 = "./server_files/" + file_name;
-            util_1.promisify(fs.writeFile)(my_data_filename3, "", "utf8");
-            var myFile4;
-            if (folder == "y") {
-                myFile4 = fileType.instantiate({
+            var my_data_filename = "./server_files/" + file_name;
+            util_1.promisify(fs.writeFile)(my_data_filename, "", "utf8");
+            var myFile;
+            if (folder == "yes") {
+                myFile = fileType.instantiate({
                     nodeId: nodeid,
                     browseName: file_name,
                     organizedBy: Documents
                 });
             }
             else {
-                myFile4 = fileType.instantiate({
+                myFile = fileType.instantiate({
                     nodeId: nodeid,
                     browseName: file_name,
                     organizedBy: FileSystem
                 });
             }
-            file_transfer.installFileType(myFile4, {
-                filename: my_data_filename3
+            file_transfer.installFileType(myFile, {
+                filename: my_data_filename
             });
+            var callMethodResult;
             console.log("ho creato il nodo FileType");
-            var callMethodResult = {
+            callMethodResult = {
                 statusCode: opcua.StatusCodes.Good,
                 outputArguments: []
             };

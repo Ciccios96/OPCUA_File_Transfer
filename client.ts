@@ -17,23 +17,131 @@ const connectionStrategy = {
     initialDelay: 1000,
     maxRetry: 1
 }
-const options = {
-    applicationName: "MyClient",
-    connectionStrategy: connectionStrategy,
-    securityMode: MessageSecurityMode.None,
-    securityPolicy: SecurityPolicy.None,
-    endpoint_must_exist: false,
-};
-const client = OPCUAClient.create(options);
-const endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
+//const endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
+
+console.log(require("os").hostname());
 
 async function main() {
     try {
+        var question1 = [
+            {
+              type: 'input',
+              name: 'address_server',
+              message: "Enter Server HostName:"
+            }
+        ];
+        var risposta = await inquirer.prompt(question1);
+        var oggettoJSON = JSON.stringify(risposta, null, ' ');
+        var parsedData = JSON.parse(oggettoJSON);
+        var address = parsedData.address_server;
+        
+        var question2 = [
+            {
+              type: 'input',
+              name: 'server_endpoint',
+              message: "Enter server URL endpoint:"
+            }
+        ];
+        
+        var risposta = await inquirer.prompt(question2);
+        var oggettoJSON2 = JSON.stringify(risposta, null, ' ');
+        var parsedData = JSON.parse(oggettoJSON2);
+        var endpointURL = parsedData.server_endpoint;
+
+        var secPolicy_question = [
+            {
+                type: 'rawlist',
+                name: 'command',
+                message: 'Select a securityMode:',
+                choices: ['1 - None', '2 - Sign', '3 - SignAndEncrypt']
+            }
+        ];
+        var risposta = await inquirer.prompt(secPolicy_question);
+        const oggettoJSON3 = JSON.stringify(risposta, null, ' ');
+        var parsedData = JSON.parse(oggettoJSON3);
+        var secMode = parsedData.command;
+
+        switch(secMode) {
+            case "1 - None":
+                var secPolicy_question = [
+                    {
+                        type: 'rawlist',
+                        name: 'command',
+                        message: 'Select a Security Policy:',
+                        choices: ['None']
+                    }
+                ];
+                var risposta = await inquirer.prompt(secPolicy_question);
+                const oggettoJSON = JSON.stringify(risposta, null, ' ');
+                var parsedData = JSON.parse(oggettoJSON);
+                var secPolicy = parsedData.command;
+                break;
+            case "2 - Sign":
+                var secPolicy_question = [
+                    {
+                        type: 'rawlist',
+                        name: 'command',
+                        message: 'Select a Security Policy:',
+                        choices: ['Basic128Rsa15', 'Basic256', 'Basic256Sha256']
+                    }
+                ];
+                var risposta = await inquirer.prompt(secPolicy_question);
+                const oggettoJSON2 = JSON.stringify(risposta, null, ' ');
+                var parsedData = JSON.parse(oggettoJSON2);
+                var secPolicy = parsedData.command;
+                break;
+            case "3 - SignAndEncrypt":
+                var secPolicy_question = [
+                    {
+                        type: 'rawlist',
+                        name: 'command',
+                        message: 'Select a Security Policy:',
+                        choices: ['Basic128Rsa15', 'Basic256', 'Basic256Sha256']
+                    }
+                ];
+                var risposta = await inquirer.prompt(secPolicy_question);
+                const oggettoJSON3 = JSON.stringify(risposta, null, ' ');
+                var parsedData = JSON.parse(oggettoJSON3);
+                var secPolicy = parsedData.command;
+                break;
+            default:
+                console.log("Errore...");
+            }
+
+        if(secMode == "1 - None"){
+           secMode = MessageSecurityMode.None;
+        }else if(secMode == "2 - Sign"){
+            secMode = MessageSecurityMode.Sign;
+        }else {
+            secMode = MessageSecurityMode.SignAndEncrypt;
+        }
+
+        if(secPolicy == "None"){
+            secPolicy = SecurityPolicy.None;
+        }else if (secPolicy == "Basic128Rsa15"){
+            secPolicy = SecurityPolicy.Basic128Rsa15;
+        }else if (secPolicy == "Basic256"){
+            secPolicy = SecurityPolicy.Basic256;
+        }else if (secPolicy == "Basic256Sha256"){
+            secPolicy = SecurityPolicy.Basic256Sha256;
+        }
+        const options = {
+            applicationName: "MyClient",
+            connectionStrategy: connectionStrategy,
+            securityMode: secMode,
+            securityPolicy: secPolicy,
+            endpoint_must_exist: false,
+        };
+
+        const client = OPCUAClient.create(options);
+
+        endpointURL = "opc.tcp://" + address + ":" + endpointURL
+        
     //  connect to
-        await connect(endpointUrl);
- 
+        await connect(endpointURL,client);
+            
     // createSession
-        const session = await create_session();
+        const session = await create_session(client);
  
     while(command != "exit"){
     // user input
@@ -62,7 +170,7 @@ async function main() {
                 break;
             }
         }
-    await ending(session);
+    await ending(session,client);
     } catch(err) {
         console.log("An error has occured : ",err);
         }
@@ -70,12 +178,18 @@ async function main() {
 }
 main();
 
-async function connect(endpoint){
-    await client.connect(endpoint);
-    console.log("Client connected!");
+async function connect(endpoint,client){
+    try {
+        await client.connect(endpoint);
+        console.log("Client connected!");
+    } catch (err) {
+        console.log("Cannot connect to endpoint:", endpoint);
+        console.log("retry");
+        process.exit(0);
+    }
 }
 
-async function create_session(){
+async function create_session(client){
     const session = await client.createSession();
     console.log("Session created!");
     return session;
@@ -110,6 +224,13 @@ async function read_file(session){
     var parsedData = JSON.parse(oggettoJSON);
     var StringID = parsedData.command;
     var extention = path.extname(StringID);
+
+    var browseResult = await session.browse("ns=1;s=" + StringID);
+    if ((browseResult.references).length == 0) {
+        console.log("Error, file does not exists!");
+        return;
+    }
+
     const fileNodeId = new NodeId(NodeIdType.STRING, StringID, 1);
     const clientFile = new ClientFile(session, fileNodeId);
     const mode = OpenFileMode.Read;
@@ -163,7 +284,6 @@ async function download_PDF(data,StringID){
 }
 
 async function write_file(session){
-    var ok = true;
     var questions = [
         {
             type: 'input',
@@ -177,33 +297,38 @@ async function write_file(session){
     var StringID = parsedData.command;
     if (path.extname(StringID) != ".txt"){
         console.log("Sorry, Can't Write a non txt File");
-        ok = false;
+        return;
     }
+
+    var browseResult = await session.browse("ns=1;s=" + StringID);
+    if ((browseResult.references).length == 0) {
+        console.log("Error, file does not exists!");
+        return;
+    }
+
     const fileNodeId = new NodeId(NodeIdType.STRING, StringID, 1);
     const clientFile = new ClientFile(session, fileNodeId);
     const mode = OpenFileMode.WriteAppend;
 
     await clientFile.open(mode);
 
-    if (ok == true){
-        var questions = [
-            {
-                type: 'input',
-                name: 'command',
-                message: 'What do you want to write?'
-            }
-        ];
-        var risposta = await inquirer.prompt(questions);
-        oggettoJSON = JSON.stringify(risposta,null,'');
-        var parsedData = JSON.parse(oggettoJSON);
-        var dato = parsedData.command;
+    var questions = [
+        {
+            type: 'input',
+            name: 'command',
+            message: 'What do you want to write?'
+        }
+    ];
+    var risposta = await inquirer.prompt(questions);
+    oggettoJSON = JSON.stringify(risposta,null,'');
+    var parsedData = JSON.parse(oggettoJSON);
+    var dato = parsedData.command;
     
-        const dataToWrite = Buffer.from(dato);
-        await clientFile.write(dataToWrite);
-    }
+    const dataToWrite = Buffer.from(dato);
+    await clientFile.write(dataToWrite);
 }
 
-async function ending(session){
+async function ending(session,client){
     // close session
     await session.close();
  
@@ -213,7 +338,6 @@ async function ending(session){
 }
 
 async function call_method(session) {
-    var ok = true;
     var questions = [
         {
             type: 'input',
@@ -235,58 +359,60 @@ async function call_method(session) {
 
     if (path.extname(name) != ".txt"){
         console.log("Sorry, Can't create a non txt File");
-        ok = false;
+        return;
     }
 
     if(yn != "yes" && yn != "no"){
         console.log("Sorry, bad input on yes or no");
-        ok = false;
+        return;
     }
 
-    if (ok == true){
-        const methodsToCall = [];
-        const nodeID = coerceNodeId("ns=1;i=1003");
-        methodsToCall.push({
-            objectId: coerceNodeId("ns=1;i=1002"),
-            methodId: nodeID,
-            inputArguments: [{
-                dataType: DataType.String,
-                value: name
-            },{
-                dataType: DataType.String,
-                value:yn
-            }]
-        });
-        session.call(methodsToCall, function(err,results){
-           if (err){
-               console.log(err);
-           }
-        });
-        console.log("I have called the method: " + nodeID);
+    var browseResult = await session.browse("ns=1;s=" + name);
+    if ((browseResult.references).length > 0) {
+        console.log("Error, a file named like this alredy exist!");
+        return;
+    }
 
-        const fileNodeId = new NodeId(NodeIdType.STRING, name, 1);
-        const clientFile = new ClientFile(session, fileNodeId);
-        const mode = OpenFileMode.WriteAppend;
+    const methodsToCall = [];
+    const nodeID = coerceNodeId("ns=1;i=1003");
+    methodsToCall.push({
+        objectId: coerceNodeId("ns=1;i=1002"),
+        methodId: nodeID,
+        inputArguments: [{
+            dataType: DataType.String,
+            value: name
+        },{
+            dataType: DataType.String,
+            value:yn
+        }]
+    });
+    session.call(methodsToCall, function(err,results){
+       if (err){
+           console.log(err);
+       }
+    });
+    console.log("I have called the method: " + nodeID);
+
+    const fileNodeId = new NodeId(NodeIdType.STRING, name, 1);
+    const clientFile = new ClientFile(session, fileNodeId);
+    const mode = OpenFileMode.WriteAppend;
     
-        await clientFile.open(mode);
-    
-        if (ok == true){
-            var question = [
-                {
-                    type: 'input',
-                    name: 'command',
-                    message: 'What do you want to write in the new node?'
-                }
-            ];
-            var risposta = await inquirer.prompt(question);
-            oggettoJSON = JSON.stringify(risposta,null,'');
-            var parsedData = JSON.parse(oggettoJSON);
-            var dato = parsedData.command;
-        
-            const dataToWrite = Buffer.from(dato);
-            await clientFile.write(dataToWrite);
+    await clientFile.open(mode);
+
+    var question = [
+        {
+            type: 'input',
+            name: 'command',
+            message: 'What do you want to write in the new node?'
         }
-    }
+    ];
+    var risposta = await inquirer.prompt(question);
+    oggettoJSON = JSON.stringify(risposta,null,'');
+    var parsedData = JSON.parse(oggettoJSON);
+    var dato = parsedData.command;
+        
+    const dataToWrite = Buffer.from(dato);
+    await clientFile.write(dataToWrite);
 }
 
 async function input(){
@@ -318,6 +444,13 @@ async function download(session){
     var parsedData = JSON.parse(oggettoJSON);
     var StringID = parsedData.command;
     var extention = path.extname(StringID);
+
+    var browseResult = await session.browse("ns=1;s=" + StringID);
+    if ((browseResult.references).length == 0) {
+        console.log("Error, file does not exists!");
+        return;
+    }
+
     const fileNodeId = new NodeId(NodeIdType.STRING, StringID, 1);
     const clientFile = new ClientFile(session, fileNodeId);
     const mode = OpenFileMode.Read;

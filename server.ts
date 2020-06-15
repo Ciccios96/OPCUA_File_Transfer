@@ -79,33 +79,36 @@ function post_initialize() {
 
             var nodeid = "s=" + file_name;
 
-            const my_data_filename3 = "./server_files/"+ file_name;
-            promisify(fs.writeFile)(my_data_filename3,"", "utf8");
+            const my_data_filename = "./server_files/"+ file_name;
+            promisify(fs.writeFile)(my_data_filename,"", "utf8");
 
-            var myFile4;
+            var myFile;
 
             if (folder == "yes"){
-                myFile4 = fileType.instantiate({
+                myFile = fileType.instantiate({
                     nodeId: nodeid,
                     browseName: file_name,
                     organizedBy: Documents
                 })
             }
             else {
-                myFile4 = fileType.instantiate({
+                myFile = fileType.instantiate({
                     nodeId: nodeid,
                     browseName: file_name,
                     organizedBy: FileSystem
                 })
             }
     
-            file_transfer.installFileType(myFile4, { 
-                filename: my_data_filename3
+            file_transfer.installFileType(myFile, { 
+                filename: my_data_filename
             }); 
+
+            var callMethodResult;
+            
 
             console.log("ho creato il nodo FileType");
         
-            const callMethodResult = {
+            callMethodResult = {
                 statusCode: opcua.StatusCodes.Good,
                 outputArguments: []
             };
