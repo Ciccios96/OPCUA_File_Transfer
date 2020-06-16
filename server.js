@@ -10,11 +10,15 @@ var util_1 = require("util");
 // Let's create an instance of OPCUAServer
 var server = new opcua.OPCUAServer({
     port: 4334,
-    resourcePath: "/UA/MyLittleServer",
+    resourcePath: "/UA/FileTransfer",
+    serverCertificateManager: new opcua.OPCUACertificateManager({
+        automaticallyAcceptUnknownCertificate: true,
+        rootFolder: path.join(__dirname, "../certs")
+    }),
     buildInfo: {
-        productName: "MySampleServer1",
+        productName: "FileTransfer1",
         buildNumber: "7658",
-        buildDate: new Date(2014, 5, 2)
+        buildDate: new Date()
     }
 });
 function post_initialize() {
@@ -57,37 +61,53 @@ function post_initialize() {
             outputArguments: []
         });
         method.bindMethod(function (inputArguments, context, callback) {
-            var file_name = inputArguments[0].value;
-            var folder = inputArguments[1].value;
-            console.log("Hello World ! I will create a file named ", file_name);
-            var nodeid = "s=" + file_name;
-            var my_data_filename = "./server_files/" + file_name;
-            util_1.promisify(fs.writeFile)(my_data_filename, "", "utf8");
-            var myFile;
-            if (folder == "yes") {
-                myFile = fileType.instantiate({
-                    nodeId: nodeid,
-                    browseName: file_name,
-                    organizedBy: Documents
-                });
+            try {
+                var file_name = inputArguments[0].value;
+                var folder = inputArguments[1].value;
+                console.log("I will create a file named ", file_name);
+                var nodeid = "s=" + file_name;
+                var myFile;
+                if (folder == "yes") {
+                    var my_data_filename = "./server_files/Documents/" + file_name;
+                    util_1.promisify(fs.writeFile)(my_data_filename, "", "utf8");
+                    myFile = fileType.instantiate({
+                        nodeId: nodeid,
+                        browseName: file_name,
+                        organizedBy: Documents
+                    });
+                    file_transfer.installFileType(myFile, {
+                        filename: my_data_filename
+                    });
+                }
+                else {
+                    var my_data_filename = "./server_files/" + file_name;
+                    util_1.promisify(fs.writeFile)(my_data_filename, "", "utf8");
+                    myFile = fileType.instantiate({
+                        nodeId: nodeid,
+                        browseName: file_name,
+                        organizedBy: FileSystem
+                    });
+                    file_transfer.installFileType(myFile, {
+                        filename: my_data_filename
+                    });
+                }
+                var callMethodResult;
+                console.log("ho creato il nodo FileType");
+                callMethodResult = {
+                    statusCode: opcua.StatusCodes.Good,
+                    outputArguments: []
+                };
             }
-            else {
-                myFile = fileType.instantiate({
-                    nodeId: nodeid,
-                    browseName: file_name,
-                    organizedBy: FileSystem
-                });
+            catch (_a) {
+                console.log("Error on node creation");
+                callMethodResult = {
+                    statusCode: opcua.StatusCodes.Bad,
+                    outputArguments: []
+                };
             }
-            file_transfer.installFileType(myFile, {
-                filename: my_data_filename
-            });
-            var callMethodResult;
-            console.log("ho creato il nodo FileType");
-            callMethodResult = {
-                statusCode: opcua.StatusCodes.Good,
-                outputArguments: []
-            };
-            callback(null, callMethodResult);
+            finally {
+                callback(null, callMethodResult);
+            }
         });
     }
     construct_my_address_space(server);

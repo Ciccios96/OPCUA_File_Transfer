@@ -9,11 +9,15 @@ import {promisify} from "util";
 // Let's create an instance of OPCUAServer
 const server = new opcua.OPCUAServer({
     port: 4334, // the port of the listening socket of the server
-    resourcePath: "/UA/MyLittleServer", // this path will be added to the endpoint resource name
-     buildInfo : {
-        productName: "MySampleServer1",
+    resourcePath: "/UA/FileTransfer", // this path will be added to the endpoint resource name
+    serverCertificateManager: new opcua.OPCUACertificateManager({
+        automaticallyAcceptUnknownCertificate: true,
+        rootFolder: path.join(__dirname,"../certs")
+    }),
+    buildInfo : {
+        productName: "FileTransfer1",
         buildNumber: "7658",
-        buildDate: new Date(2014,5,2)
+        buildDate: new Date()
     }
 });
 
@@ -71,48 +75,62 @@ function post_initialize() {
         });
 
         method.bindMethod((inputArguments,context,callback) => {
-
-            const file_name = inputArguments[0].value;
-            const folder = inputArguments[1].value;
+            try{
+                const file_name = inputArguments[0].value;
+                const folder = inputArguments[1].value;
         
-            console.log("Hello World ! I will create a file named ",file_name);
+                console.log("I will create a file named ",file_name);
 
-            var nodeid = "s=" + file_name;
+                var nodeid = "s=" + file_name;
 
-            const my_data_filename = "./server_files/"+ file_name;
-            promisify(fs.writeFile)(my_data_filename,"", "utf8");
+                var myFile;
 
-            var myFile;
+                if (folder == "yes"){
+                    const my_data_filename = "./server_files/Documents/"+ file_name;
+                    promisify(fs.writeFile)(my_data_filename,"", "utf8");
+                    myFile = fileType.instantiate({
+                        nodeId: nodeid,
+                        browseName: file_name,
+                        organizedBy: Documents
+                    })
+                    file_transfer.installFileType(myFile, { 
+                        filename: my_data_filename
+                    }); 
+                }
+                else {
+                    const my_data_filename = "./server_files/"+ file_name;
+                    promisify(fs.writeFile)(my_data_filename,"", "utf8");
+                    myFile = fileType.instantiate({
+                        nodeId: nodeid,
+                        browseName: file_name,
+                        organizedBy: FileSystem
+                    })
+                    file_transfer.installFileType(myFile, { 
+                        filename: my_data_filename
+                    }); 
+                }
 
-            if (folder == "yes"){
-                myFile = fileType.instantiate({
-                    nodeId: nodeid,
-                    browseName: file_name,
-                    organizedBy: Documents
-                })
-            }
-            else {
-                myFile = fileType.instantiate({
-                    nodeId: nodeid,
-                    browseName: file_name,
-                    organizedBy: FileSystem
-                })
-            }
-    
-            file_transfer.installFileType(myFile, { 
-                filename: my_data_filename
-            }); 
-
-            var callMethodResult;
+                var callMethodResult;
             
 
-            console.log("ho creato il nodo FileType");
+                console.log("ho creato il nodo FileType");
         
-            callMethodResult = {
-                statusCode: opcua.StatusCodes.Good,
+                callMethodResult = {
+                    statusCode: opcua.StatusCodes.Good,
+                    outputArguments: []
+                };
+            }catch
+            {      
+                console.log("Error on node creation");      
+                callMethodResult = {
+                statusCode: opcua.StatusCodes.Bad,
                 outputArguments: []
             };
-            callback(null,callMethodResult);
+            }
+            finally 
+            {
+                callback(null,callMethodResult);
+            }
         });
 
     }

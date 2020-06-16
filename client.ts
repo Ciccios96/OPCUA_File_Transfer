@@ -390,6 +390,9 @@ async function call_method(session) {
        if (err){
            console.log(err);
        }
+       else{
+           console.log(results);
+       }
     });
     console.log("I have called the method: " + nodeID);
 

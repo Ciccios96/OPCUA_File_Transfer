@@ -560,6 +560,9 @@ function call_method(session) {
                         if (err) {
                             console.log(err);
                         }
+                        else {
+                            console.log(results);
+                        }
                     });
                     console.log("I have called the method: " + nodeID);
                     fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, name, 1);
