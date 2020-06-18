@@ -5,6 +5,10 @@ const fs = require("fs");
 const file_transfer = require("node-opcua-file-transfer");
 const path = require('path');
 import {promisify} from "util";
+import { NodeIdType, NodeId, StatusCodes } from "node-opcua";
+
+var file_name;
+var folder;
 
 // Let's create an instance of OPCUAServer
 const server = new opcua.OPCUAServer({
@@ -53,10 +57,10 @@ function post_initialize() {
             organizedBy: FileSystem,
             browseName: "ObjectFile"
         });
-        //creazione metodo
+        //creazione metodo createFileObject
         const method = namespace.addMethod(objectFile,{
 
-            browseName: "createFile",
+            browseName: "createFileObjecttxt",
         
             inputArguments:  [
                 {
@@ -76,8 +80,8 @@ function post_initialize() {
 
         method.bindMethod((inputArguments,context,callback) => {
             try{
-                const file_name = inputArguments[0].value;
-                const folder = inputArguments[1].value;
+                file_name = inputArguments[0].value;
+                folder = inputArguments[1].value;
         
                 console.log("I will create a file named ",file_name);
 
@@ -86,7 +90,7 @@ function post_initialize() {
                 var myFile;
 
                 if (folder == "yes"){
-                    const my_data_filename = "./server_files/Documents/"+ file_name;
+                    var my_data_filename = "./server_files/Documents/"+ file_name;
                     promisify(fs.writeFile)(my_data_filename,"", "utf8");
                     myFile = fileType.instantiate({
                         nodeId: nodeid,
@@ -98,7 +102,7 @@ function post_initialize() {
                     }); 
                 }
                 else {
-                    const my_data_filename = "./server_files/"+ file_name;
+                    var my_data_filename = "./server_files/"+ file_name;
                     promisify(fs.writeFile)(my_data_filename,"", "utf8");
                     myFile = fileType.instantiate({
                         nodeId: nodeid,
@@ -120,7 +124,186 @@ function post_initialize() {
                     outputArguments: []
                 };
             }catch
-            {      
+            {   
+                if (folder == "yes"){
+                    var my_data_filename = "./server_files/Documents/"+ file_name;
+                    fs.unlink(my_data_filename,function(err){
+                        if(err){
+                            console.log(err);
+                        }
+                    })
+                }
+                else {
+                    var my_data_filename = "./server_files/"+ file_name;
+                    fs.unlink(my_data_filename,function(err){
+                        if(err){
+                            console.log(err);
+                        }
+                    })
+                }
+                console.log("Error on node creation");      
+                callMethodResult = {
+                statusCode: opcua.StatusCodes.Bad,
+                outputArguments: []
+            };
+            }
+            finally 
+            {
+                callback(null,callMethodResult);
+            }
+        });
+
+        //creazione metodo eliminateFileObject
+        const method2 = namespace.addMethod(objectFile,{
+
+            nodeId: "s=deleteFileObject",
+            browseName: "deleteFileObject",
+        
+            inputArguments:  [
+                {
+                    name:"filename",
+                    description: { text: "specifies the name of the File" },
+                    dataType: opcua.DataType.String        
+                }
+             ],
+            outputArguments: []
+        });
+
+        method2.bindMethod((inputArguments,context,callback) =>{
+            try{
+                const fileName = inputArguments[0].value;
+
+                const fileNodeId = new NodeId(NodeIdType.STRING,fileName,1);
+                
+                var files=fs.readdirSync(startPath);
+                for(var i=0;i<files.length;i++){
+                    var filename=path.join(startPath,files[i]);
+                    var stat = fs.lstatSync(filename);
+                    if (stat.isDirectory()){
+                        var filenames = filename;
+                        var more_files=fs.readdirSync(filenames);
+                        console.log(filenames);
+                        for(var i=0;i<more_files.length;i++){
+                            var filenames=path.join(filenames,more_files[i]);
+                            if (more_files[i] == fileName){
+                                const my_data_filename = path.join(__dirname,"./server_files/Documents/" + fileName);
+                                promisify(fs.unlink)(my_data_filename);
+                            }
+                        }
+                    }
+                    else if (files[i] == fileName) {
+                        const my_data_filename = path.join(__dirname,"./server_files/" + fileName);
+                        promisify(fs.unlink)(my_data_filename);
+                    };
+                };
+
+                namespace.deleteNode(fileNodeId);
+
+                console.log("Eliminated node: ",fileName);
+
+                var callMethodResult = {
+                    statusCode: StatusCodes.Good,
+                    outputArguments: []
+                }
+            }catch{
+                var callMethodResult = {
+                    statusCode: StatusCodes.Bad,
+                    outputArguments: []
+                }
+            }finally{
+                callback(null,callMethodResult);
+            }
+        });
+
+        const method3 = namespace.addMethod(objectFile,{
+
+            browseName: "createFileObjectpdf",
+        
+            inputArguments:  [
+                {
+                    name:"filename",
+                    description: { text: "specifies the name of the File" },
+                    dataType: opcua.DataType.String        
+                },
+                {
+                    name:"folder",
+                    description: { text: "specifies if the node must be in the FileSystem or Documents"},
+                    dataType: opcua.DataType.String
+                },
+                {
+                    name:"binary",
+                    description: { text: "specifies if the binary of the pdf"},
+                    dataType: opcua.DataType.String
+                }
+             ],
+        
+            outputArguments: []
+        });
+
+        method3.bindMethod((inputArguments,context,callback) => {
+            try{
+                file_name = inputArguments[0].value;
+                folder = inputArguments[1].value;
+                var binary = inputArguments[2].value;
+        
+                console.log("I will create a file named ",file_name);
+
+                var nodeid = "s=" + file_name;
+
+                var myFile;
+
+                if (folder == "yes"){
+                    var my_data_filename = "./server_files/Documents/"+ file_name;
+                    promisify(fs.writeFile)(my_data_filename,binary, "binary");
+                    myFile = fileType.instantiate({
+                        nodeId: nodeid,
+                        browseName: file_name,
+                        organizedBy: Documents
+                    })
+                    file_transfer.installFileType(myFile, { 
+                        filename: my_data_filename
+                    }); 
+                }
+                else {
+                    var my_data_filename = "./server_files/"+ file_name;
+                    promisify(fs.writeFile)(my_data_filename,binary, "binary");
+                    myFile = fileType.instantiate({
+                        nodeId: nodeid,
+                        browseName: file_name,
+                        organizedBy: FileSystem
+                    })
+                    file_transfer.installFileType(myFile, { 
+                        filename: my_data_filename
+                    }); 
+                }
+
+                var callMethodResult;
+            
+
+                console.log("ho creato il nodo FileType");
+        
+                callMethodResult = {
+                    statusCode: opcua.StatusCodes.Good,
+                    outputArguments: []
+                };
+            }catch
+            {   
+                if (folder == "yes"){
+                    var my_data_filename = "./server_files/Documents/"+ file_name;
+                    fs.unlink(my_data_filename,function(err){
+                        if(err){
+                            console.log(err);
+                        }
+                    })
+                }
+                else {
+                    var my_data_filename = "./server_files/"+ file_name;
+                    fs.unlink(my_data_filename,function(err){
+                        if(err){
+                            console.log(err);
+                        }
+                    })
+                }
                 console.log("Error on node creation");      
                 callMethodResult = {
                 statusCode: opcua.StatusCodes.Bad,

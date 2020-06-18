@@ -4,7 +4,8 @@ import {
     NodeId,
     NodeIdType,
     coerceNodeId,
-    DataType
+    DataType,
+    MethodIds
 } from "node-opcua";
 import { ClientFile, OpenFileMode } from "node-opcua-file-transfer";
 import {promisify} from "util";
@@ -19,34 +20,19 @@ const connectionStrategy = {
 }
 //const endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
 
-console.log(require("os").hostname());
-
 async function main() {
     try {
-        var question1 = [
+        var question = [
             {
               type: 'input',
               name: 'address_server',
-              message: "Enter Server HostName:"
+              message: "Enter Server endpoint URL:"
             }
         ];
-        var risposta = await inquirer.prompt(question1);
+        var risposta = await inquirer.prompt(question);
         var oggettoJSON = JSON.stringify(risposta, null, ' ');
         var parsedData = JSON.parse(oggettoJSON);
         var address = parsedData.address_server;
-        
-        var question2 = [
-            {
-              type: 'input',
-              name: 'server_endpoint',
-              message: "Enter server URL endpoint:"
-            }
-        ];
-        
-        var risposta = await inquirer.prompt(question2);
-        var oggettoJSON2 = JSON.stringify(risposta, null, ' ');
-        var parsedData = JSON.parse(oggettoJSON2);
-        var endpointURL = parsedData.server_endpoint;
 
         var secPolicy_question = [
             {
@@ -134,11 +120,9 @@ async function main() {
         };
 
         const client = OPCUAClient.create(options);
-
-        endpointURL = "opc.tcp://" + address + ":" + endpointURL
         
     //  connect to
-        await connect(endpointURL,client);
+        await connect(address,client);
             
     // createSession
         const session = await create_session(client);
@@ -164,6 +148,9 @@ async function main() {
                 await download(session);
                 break;
             case "exit":
+                break;
+            case "delete":
+                await delete_file(session);
                 break;
             default:
                 console.log("Wrong Input, retry");
@@ -306,11 +293,32 @@ async function write_file(session){
         return;
     }
 
+    var question = [
+        {
+            type: 'rawlist',
+            name: 'command',
+            message: 'Please select a opening mode for the file',
+            choices: ["Write","WriteAppend","WriteEraseExisting"]
+        }
+    ];
+    var risposta = await inquirer.prompt(question);
+    var oggettoJSON = JSON.stringify(risposta,null,'');
+    var parsedData = JSON.parse(oggettoJSON);
+    var write_mode = parsedData.command;
+
     const fileNodeId = new NodeId(NodeIdType.STRING, StringID, 1);
     const clientFile = new ClientFile(session, fileNodeId);
-    const mode = OpenFileMode.WriteAppend;
 
-    await clientFile.open(mode);
+    if(write_mode == "Write"){
+        const mode = OpenFileMode.Write;
+        await clientFile.open(mode);
+    }else if(write_mode == "WriteAppend"){
+        const mode = OpenFileMode.WriteAppend;
+        await clientFile.open(mode);
+    }else if(write_mode == "WriteEraseExisting"){
+        const mode = OpenFileMode.WriteEraseExisting;
+        await clientFile.open(mode);
+    }
 
     var questions = [
         {
@@ -338,6 +346,7 @@ async function ending(session,client){
 }
 
 async function call_method(session) {
+    var override = false;
     var questions = [
         {
             type: 'input',
@@ -357,8 +366,8 @@ async function call_method(session) {
     var name = parsedData.command;
     var yn = parsedData.command2;
 
-    if (path.extname(name) != ".txt"){
-        console.log("Sorry, Can't create a non txt File");
+    if (path.extname(name) != ".txt" && path.extname(name) != ".pdf"){
+        console.log("Sorry, Can't create a non txt or pdf File");
         return;
     }
 
@@ -369,53 +378,189 @@ async function call_method(session) {
 
     var browseResult = await session.browse("ns=1;s=" + name);
     if ((browseResult.references).length > 0) {
-        console.log("Error, a file named like this alredy exist!");
-        return;
+        var override_question = [
+            {
+                type: 'rawlist',
+                name: 'command',
+                message: 'The file alredy exists, do you want to override it?',
+                choices: ["yes","no"]
+            }
+        ];
+        var risposta = await inquirer.prompt(override_question);
+        var oggettoJSON = JSON.stringify(risposta,null,'');
+        var parsedData = JSON.parse(oggettoJSON);
+        if (parsedData.command == "yes"){
+            override = true;
+        }else if (parsedData.command == "no"){
+            return;
+        }
     }
 
-    const methodsToCall = [];
-    const nodeID = coerceNodeId("ns=1;i=1003");
-    methodsToCall.push({
-        objectId: coerceNodeId("ns=1;i=1002"),
-        methodId: nodeID,
-        inputArguments: [{
-            dataType: DataType.String,
-            value: name
-        },{
-            dataType: DataType.String,
-            value:yn
-        }]
-    });
-    session.call(methodsToCall, function(err,results){
-       if (err){
-           console.log(err);
-       }
-       else{
-           console.log(results);
-       }
-    });
-    console.log("I have called the method: " + nodeID);
-
-    const fileNodeId = new NodeId(NodeIdType.STRING, name, 1);
-    const clientFile = new ClientFile(session, fileNodeId);
-    const mode = OpenFileMode.WriteAppend;
-    
-    await clientFile.open(mode);
-
-    var question = [
-        {
-            type: 'input',
-            name: 'command',
-            message: 'What do you want to write in the new node?'
+    if(path.extname(name) == ".txt"){
+        if(override == false){
+            const methodsToCall = [];
+            const nodeID = coerceNodeId("ns=1;i=1003");
+            methodsToCall.push({
+                objectId: coerceNodeId("ns=1;i=1002"),
+                methodId: nodeID,
+                inputArguments: [{
+                    dataType: DataType.String,
+                    value: name
+                },{
+                    dataType: DataType.String,
+                    value:yn
+                }]
+            });
+            session.call(methodsToCall, function(err,results){
+               if (err){
+                   console.log(err);
+               }
+               else{
+                   console.log("ok");
+               }
+            });
+            console.log("I have called the method: " + nodeID);
         }
-    ];
-    var risposta = await inquirer.prompt(question);
-    oggettoJSON = JSON.stringify(risposta,null,'');
-    var parsedData = JSON.parse(oggettoJSON);
-    var dato = parsedData.command;
+
+        const fileNodeId = new NodeId(NodeIdType.STRING, name, 1);
+        const clientFile = new ClientFile(session, fileNodeId);
+        const mode = OpenFileMode.Write;
+    
+        await clientFile.open(mode);
+
+        var question = [
+           {
+                type: 'input',
+                name: 'command',
+                message: 'What do you want to write in this node?'
+            }
+        ];
+        var risposta = await inquirer.prompt(question);
+        oggettoJSON = JSON.stringify(risposta,null,'');
+        var parsedData = JSON.parse(oggettoJSON);
+        var dato = parsedData.command;
         
-    const dataToWrite = Buffer.from(dato);
-    await clientFile.write(dataToWrite);
+        const dataToWrite = Buffer.from(dato);
+        await clientFile.write(dataToWrite);
+    }
+
+    if(path.extname(name) == ".pdf"){
+        if(override == false){
+            var question = [
+                {
+                     type: 'input',
+                     name: 'command',
+                     message: 'Please write the path for the .pdf file'
+                 }
+             ];
+             var risposta = await inquirer.prompt(question);
+             oggettoJSON = JSON.stringify(risposta,null,'');
+             var parsedData = JSON.parse(oggettoJSON);
+             var dato = parsedData.command;
+
+            var binary = await fs.readFile(dato,'binary',function(err,binary){
+                if (err){
+                    console.log("Error, file not found");
+                    return;
+                }else{
+                    console.log("File ok");
+                    console.log(binary);
+                }
+            });
+
+            const methodsToCall = [];
+            const nodeID = coerceNodeId("ns=1;i=1006");
+            methodsToCall.push({
+                objectId: coerceNodeId("ns=1;i=1002"),
+                methodId: nodeID,
+                inputArguments: [{
+                    dataType: DataType.String,
+                    value: name
+                },{
+                    dataType: DataType.String,
+                    value:yn
+                },{
+                    dataType: DataType.String,
+                    value:binary
+                }]
+            });
+            session.call(methodsToCall, function(err,results){
+               if (err){
+                   console.log(err);
+               }
+               else{
+                   console.log("ok");
+               }
+            });
+            console.log("I have called the method: " + nodeID);
+        }
+        else if (override == true){
+            const methodToCall = [];
+            const nodeID = coerceNodeId("ns=1;s=deleteFileObject");
+            methodToCall.push({
+                objectId: coerceNodeId("ns=1;i=1002"),
+                methodId: nodeID,
+                inputArguments: [{
+                    dataType: DataType.String,
+                    value: name
+                }]
+            });
+            session.call(methodToCall,function(err,results){
+                if(err){
+                    console.log("Errore:", err);
+                }
+                else{
+                    null;
+                }
+            });
+            var question = [
+                {
+                     type: 'input',
+                     name: 'command',
+                     message: 'Please write the path for the .pdf file'
+                 }
+             ];
+             var risposta = await inquirer.prompt(question);
+             oggettoJSON = JSON.stringify(risposta,null,'');
+             var parsedData = JSON.parse(oggettoJSON);
+             var dato = parsedData.command;
+
+            var binary = await fs.readFile(dato,'binary',function(err,binary){
+                if (err){
+                    console.log("Error, file not found");
+                    return;
+                }else{
+                    console.log("File ok");
+                }
+            });
+
+            const methodsToCall2 = [];
+            const nodeID2 = coerceNodeId("ns=1;s=createFileObjectpdf");
+            methodsToCall2.push({
+                objectId: coerceNodeId("ns=1;i=1002"),
+                methodId: nodeID2,
+                inputArguments: [{
+                    dataType: DataType.String,
+                    value: name
+                },{
+                    dataType: DataType.String,
+                    value:yn
+                },{
+                    dataType: DataType.String,
+                    value:binary
+                }]
+            });
+            session.call(methodsToCall2, function(err,results){
+               if (err){
+                   console.log(err);
+               }
+               else{
+                   console.log("ok");
+               }
+            });
+            console.log("I have called the method: " + nodeID2);
+        }
+        }
 }
 
 async function input(){
@@ -425,7 +570,7 @@ async function input(){
             type: 'rawlist',
             name: 'command',
             message: 'Avaiable Commands:',
-            choices: ["browse","read","write","upload","download","exit"]
+            choices: ["browse","read","write","upload","download","delete","exit"]
         }
     ];
     risposta = await inquirer.prompt(questions);
@@ -471,4 +616,43 @@ async function download(session){
     else if (extention == ".pdf")
     download_PDF(data,StringID);
     console.log("File Downloaded");
+}
+
+async function delete_file(session){
+    var question = [
+        {
+            type: 'input',
+            name: 'command',
+            message: 'What file do you want to delete?'
+        }
+    ];
+    var risposta = await inquirer.prompt(question);
+    var oggettoJSON = JSON.stringify(risposta,null,'');
+    var parsedData = JSON.parse(oggettoJSON);
+    var name = parsedData.command;
+
+    var browseResult = await session.browse("ns=1;s=" + name);
+    if ((browseResult.references).length == 0) {
+        console.log("Error, file does not exists!");
+        return;
+    }
+
+    const methodToCall = [];
+    const nodeID = coerceNodeId("ns=1;s=deleteFileObject");
+    methodToCall.push({
+        objectId: coerceNodeId("ns=1;i=1002"),
+        methodId: nodeID,
+        inputArguments: [{
+            dataType: DataType.String,
+            value: name
+        }]
+    });
+    session.call(methodToCall,function(err,results){
+        if(err){
+            console.log("Errore:", err);
+        }
+        else{
+            console.log("File Eliminated");
+        }
+    });
 }

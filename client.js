@@ -48,40 +48,26 @@ var connectionStrategy = {
     maxRetry: 1
 };
 //const endpointUrl = "opc.tcp://" + require("os").hostname() + ":4334/UA/MyLittleServer";
-console.log(require("os").hostname());
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var question1, risposta, oggettoJSON, parsedData, address, question2, risposta, oggettoJSON2, parsedData, endpointURL, secPolicy_question, risposta, oggettoJSON3, parsedData, secMode, _a, secPolicy_question, risposta, oggettoJSON_1, parsedData, secPolicy, secPolicy_question, risposta, oggettoJSON2_1, parsedData, secPolicy, secPolicy_question, risposta, oggettoJSON3_1, parsedData, secPolicy, options, client, session, _b, err_1;
+        var question, risposta, oggettoJSON, parsedData, address, secPolicy_question, risposta, oggettoJSON3, parsedData, secMode, _a, secPolicy_question, risposta, oggettoJSON_1, parsedData, secPolicy, secPolicy_question, risposta, oggettoJSON2, parsedData, secPolicy, secPolicy_question, risposta, oggettoJSON3_1, parsedData, secPolicy, options, client, session, _b, err_1;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    _c.trys.push([0, 31, , 32]);
-                    question1 = [
+                    _c.trys.push([0, 32, , 33]);
+                    question = [
                         {
                             type: 'input',
                             name: 'address_server',
-                            message: "Enter Server HostName:"
+                            message: "Enter Server endpoint URL:"
                         }
                     ];
-                    return [4 /*yield*/, inquirer.prompt(question1)];
+                    return [4 /*yield*/, inquirer.prompt(question)];
                 case 1:
                     risposta = _c.sent();
                     oggettoJSON = JSON.stringify(risposta, null, ' ');
                     parsedData = JSON.parse(oggettoJSON);
                     address = parsedData.address_server;
-                    question2 = [
-                        {
-                            type: 'input',
-                            name: 'server_endpoint',
-                            message: "Enter server URL endpoint:"
-                        }
-                    ];
-                    return [4 /*yield*/, inquirer.prompt(question2)];
-                case 2:
-                    risposta = _c.sent();
-                    oggettoJSON2 = JSON.stringify(risposta, null, ' ');
-                    parsedData = JSON.parse(oggettoJSON2);
-                    endpointURL = parsedData.server_endpoint;
                     secPolicy_question = [
                         {
                             type: 'rawlist',
@@ -91,19 +77,19 @@ function main() {
                         }
                     ];
                     return [4 /*yield*/, inquirer.prompt(secPolicy_question)];
-                case 3:
+                case 2:
                     risposta = _c.sent();
                     oggettoJSON3 = JSON.stringify(risposta, null, ' ');
                     parsedData = JSON.parse(oggettoJSON3);
                     secMode = parsedData.command;
                     _a = secMode;
                     switch (_a) {
-                        case "1 - None": return [3 /*break*/, 4];
-                        case "2 - Sign": return [3 /*break*/, 6];
-                        case "3 - SignAndEncrypt": return [3 /*break*/, 8];
+                        case "1 - None": return [3 /*break*/, 3];
+                        case "2 - Sign": return [3 /*break*/, 5];
+                        case "3 - SignAndEncrypt": return [3 /*break*/, 7];
                     }
-                    return [3 /*break*/, 10];
-                case 4:
+                    return [3 /*break*/, 9];
+                case 3:
                     secPolicy_question = [
                         {
                             type: 'rawlist',
@@ -113,29 +99,29 @@ function main() {
                         }
                     ];
                     return [4 /*yield*/, inquirer.prompt(secPolicy_question)];
-                case 5:
+                case 4:
                     risposta = _c.sent();
                     oggettoJSON_1 = JSON.stringify(risposta, null, ' ');
                     parsedData = JSON.parse(oggettoJSON_1);
                     secPolicy = parsedData.command;
-                    return [3 /*break*/, 11];
+                    return [3 /*break*/, 10];
+                case 5:
+                    secPolicy_question = [
+                        {
+                            type: 'rawlist',
+                            name: 'command',
+                            message: 'Select a Security Policy:',
+                            choices: ['Basic128Rsa15', 'Basic256', 'Basic256Sha256']
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(secPolicy_question)];
                 case 6:
-                    secPolicy_question = [
-                        {
-                            type: 'rawlist',
-                            name: 'command',
-                            message: 'Select a Security Policy:',
-                            choices: ['Basic128Rsa15', 'Basic256', 'Basic256Sha256']
-                        }
-                    ];
-                    return [4 /*yield*/, inquirer.prompt(secPolicy_question)];
-                case 7:
                     risposta = _c.sent();
-                    oggettoJSON2_1 = JSON.stringify(risposta, null, ' ');
-                    parsedData = JSON.parse(oggettoJSON2_1);
+                    oggettoJSON2 = JSON.stringify(risposta, null, ' ');
+                    parsedData = JSON.parse(oggettoJSON2);
                     secPolicy = parsedData.command;
-                    return [3 /*break*/, 11];
-                case 8:
+                    return [3 /*break*/, 10];
+                case 7:
                     secPolicy_question = [
                         {
                             type: 'rawlist',
@@ -145,16 +131,16 @@ function main() {
                         }
                     ];
                     return [4 /*yield*/, inquirer.prompt(secPolicy_question)];
-                case 9:
+                case 8:
                     risposta = _c.sent();
                     oggettoJSON3_1 = JSON.stringify(risposta, null, ' ');
                     parsedData = JSON.parse(oggettoJSON3_1);
                     secPolicy = parsedData.command;
-                    return [3 /*break*/, 11];
-                case 10:
+                    return [3 /*break*/, 10];
+                case 9:
                     console.log("Errore...");
-                    _c.label = 11;
-                case 11:
+                    _c.label = 10;
+                case 10:
                     if (secMode == "1 - None") {
                         secMode = node_opcua_1.MessageSecurityMode.None;
                     }
@@ -184,66 +170,70 @@ function main() {
                         endpoint_must_exist: false
                     };
                     client = node_opcua_1.OPCUAClient.create(options);
-                    endpointURL = "opc.tcp://" + address + ":" + endpointURL;
                     //  connect to
-                    return [4 /*yield*/, connect(endpointURL, client)];
-                case 12:
+                    return [4 /*yield*/, connect(address, client)];
+                case 11:
                     //  connect to
                     _c.sent();
                     return [4 /*yield*/, create_session(client)];
-                case 13:
+                case 12:
                     session = _c.sent();
-                    _c.label = 14;
-                case 14:
-                    if (!(command != "exit")) return [3 /*break*/, 29];
+                    _c.label = 13;
+                case 13:
+                    if (!(command != "exit")) return [3 /*break*/, 30];
                     return [4 /*yield*/, input()];
-                case 15:
+                case 14:
                     // user input
                     command = _c.sent();
                     _b = command;
                     switch (_b) {
-                        case "browse": return [3 /*break*/, 16];
-                        case "read": return [3 /*break*/, 18];
-                        case "write": return [3 /*break*/, 20];
-                        case "upload": return [3 /*break*/, 22];
-                        case "download": return [3 /*break*/, 24];
-                        case "exit": return [3 /*break*/, 26];
+                        case "browse": return [3 /*break*/, 15];
+                        case "read": return [3 /*break*/, 17];
+                        case "write": return [3 /*break*/, 19];
+                        case "upload": return [3 /*break*/, 21];
+                        case "download": return [3 /*break*/, 23];
+                        case "exit": return [3 /*break*/, 25];
+                        case "delete": return [3 /*break*/, 26];
                     }
-                    return [3 /*break*/, 27];
-                case 16: return [4 /*yield*/, browse(session)];
-                case 17:
-                    _c.sent();
                     return [3 /*break*/, 28];
-                case 18: return [4 /*yield*/, read_file(session)];
-                case 19:
+                case 15: return [4 /*yield*/, browse(session)];
+                case 16:
                     _c.sent();
-                    return [3 /*break*/, 28];
-                case 20: return [4 /*yield*/, write_file(session)];
-                case 21:
+                    return [3 /*break*/, 29];
+                case 17: return [4 /*yield*/, read_file(session)];
+                case 18:
                     _c.sent();
-                    return [3 /*break*/, 28];
-                case 22: return [4 /*yield*/, call_method(session)];
-                case 23:
+                    return [3 /*break*/, 29];
+                case 19: return [4 /*yield*/, write_file(session)];
+                case 20:
                     _c.sent();
-                    return [3 /*break*/, 28];
-                case 24: return [4 /*yield*/, download(session)];
-                case 25:
+                    return [3 /*break*/, 29];
+                case 21: return [4 /*yield*/, call_method(session)];
+                case 22:
                     _c.sent();
-                    return [3 /*break*/, 28];
-                case 26: return [3 /*break*/, 28];
+                    return [3 /*break*/, 29];
+                case 23: return [4 /*yield*/, download(session)];
+                case 24:
+                    _c.sent();
+                    return [3 /*break*/, 29];
+                case 25: return [3 /*break*/, 29];
+                case 26: return [4 /*yield*/, delete_file(session)];
                 case 27:
-                    console.log("Wrong Input, retry");
-                    return [3 /*break*/, 28];
-                case 28: return [3 /*break*/, 14];
-                case 29: return [4 /*yield*/, ending(session, client)];
-                case 30:
                     _c.sent();
-                    return [3 /*break*/, 32];
+                    return [3 /*break*/, 29];
+                case 28:
+                    console.log("Wrong Input, retry");
+                    return [3 /*break*/, 29];
+                case 29: return [3 /*break*/, 13];
+                case 30: return [4 /*yield*/, ending(session, client)];
                 case 31:
+                    _c.sent();
+                    return [3 /*break*/, 33];
+                case 32:
                     err_1 = _c.sent();
                     console.log("An error has occured : ", err_1);
-                    return [3 /*break*/, 32];
-                case 32: return [2 /*return*/];
+                    return [3 /*break*/, 33];
+                case 33: return [2 /*return*/];
             }
         });
     });
@@ -425,7 +415,7 @@ function download_PDF(data, StringID) {
 }
 function write_file(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var questions, risposta, oggettoJSON, parsedData, StringID, browseResult, fileNodeId, clientFile, mode, questions, risposta, parsedData, dato, dataToWrite;
+        var questions, risposta, oggettoJSON, parsedData, StringID, browseResult, question, risposta, oggettoJSON, parsedData, write_mode, fileNodeId, clientFile, mode, mode, mode, questions, risposta, parsedData, dato, dataToWrite;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -453,12 +443,43 @@ function write_file(session) {
                         console.log("Error, file does not exists!");
                         return [2 /*return*/];
                     }
+                    question = [
+                        {
+                            type: 'rawlist',
+                            name: 'command',
+                            message: 'Please select a opening mode for the file',
+                            choices: ["Write", "WriteAppend", "WriteEraseExisting"]
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(question)];
+                case 3:
+                    risposta = _a.sent();
+                    oggettoJSON = JSON.stringify(risposta, null, '');
+                    parsedData = JSON.parse(oggettoJSON);
+                    write_mode = parsedData.command;
                     fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, StringID, 1);
                     clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
+                    if (!(write_mode == "Write")) return [3 /*break*/, 5];
+                    mode = node_opcua_file_transfer_1.OpenFileMode.Write;
+                    return [4 /*yield*/, clientFile.open(mode)];
+                case 4:
+                    _a.sent();
+                    return [3 /*break*/, 9];
+                case 5:
+                    if (!(write_mode == "WriteAppend")) return [3 /*break*/, 7];
                     mode = node_opcua_file_transfer_1.OpenFileMode.WriteAppend;
                     return [4 /*yield*/, clientFile.open(mode)];
-                case 3:
+                case 6:
                     _a.sent();
+                    return [3 /*break*/, 9];
+                case 7:
+                    if (!(write_mode == "WriteEraseExisting")) return [3 /*break*/, 9];
+                    mode = node_opcua_file_transfer_1.OpenFileMode.WriteEraseExisting;
+                    return [4 /*yield*/, clientFile.open(mode)];
+                case 8:
+                    _a.sent();
+                    _a.label = 9;
+                case 9:
                     questions = [
                         {
                             type: 'input',
@@ -467,14 +488,14 @@ function write_file(session) {
                         }
                     ];
                     return [4 /*yield*/, inquirer.prompt(questions)];
-                case 4:
+                case 10:
                     risposta = _a.sent();
                     oggettoJSON = JSON.stringify(risposta, null, '');
                     parsedData = JSON.parse(oggettoJSON);
                     dato = parsedData.command;
                     dataToWrite = Buffer.from(dato);
                     return [4 /*yield*/, clientFile.write(dataToWrite)];
-                case 5:
+                case 11:
                     _a.sent();
                     return [2 /*return*/];
             }
@@ -504,10 +525,11 @@ function ending(session, client) {
 }
 function call_method(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var questions, risposta, oggettoJSON, parsedData, name, yn, browseResult, methodsToCall, nodeID, fileNodeId, clientFile, mode, question, risposta, parsedData, dato, dataToWrite;
+        var override, questions, risposta, oggettoJSON, parsedData, name, yn, browseResult, override_question, risposta, oggettoJSON, parsedData, methodsToCall, nodeID, fileNodeId, clientFile, mode, question, risposta, parsedData, dato, dataToWrite, question, risposta, parsedData, dato, binary, methodsToCall, nodeID, methodToCall, nodeID, question, risposta, parsedData, dato, binary, methodsToCall, nodeID2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    override = false;
                     questions = [
                         {
                             type: 'input',
@@ -528,8 +550,8 @@ function call_method(session) {
                     parsedData = JSON.parse(oggettoJSON);
                     name = parsedData.command;
                     yn = parsedData.command2;
-                    if (path.extname(name) != ".txt") {
-                        console.log("Sorry, Can't create a non txt File");
+                    if (path.extname(name) != ".txt" && path.extname(name) != ".pdf") {
+                        console.log("Sorry, Can't create a non txt or pdf File");
                         return [2 /*return*/];
                     }
                     if (yn != "yes" && yn != "no") {
@@ -539,12 +561,107 @@ function call_method(session) {
                     return [4 /*yield*/, session.browse("ns=1;s=" + name)];
                 case 2:
                     browseResult = _a.sent();
-                    if ((browseResult.references).length > 0) {
-                        console.log("Error, a file named like this alredy exist!");
+                    if (!((browseResult.references).length > 0)) return [3 /*break*/, 4];
+                    override_question = [
+                        {
+                            type: 'rawlist',
+                            name: 'command',
+                            message: 'The file alredy exists, do you want to override it?',
+                            choices: ["yes", "no"]
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(override_question)];
+                case 3:
+                    risposta = _a.sent();
+                    oggettoJSON = JSON.stringify(risposta, null, '');
+                    parsedData = JSON.parse(oggettoJSON);
+                    if (parsedData.command == "yes") {
+                        override = true;
+                    }
+                    else if (parsedData.command == "no") {
                         return [2 /*return*/];
                     }
+                    _a.label = 4;
+                case 4:
+                    if (!(path.extname(name) == ".txt")) return [3 /*break*/, 8];
+                    if (override == false) {
+                        methodsToCall = [];
+                        nodeID = node_opcua_1.coerceNodeId("ns=1;i=1003");
+                        methodsToCall.push({
+                            objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
+                            methodId: nodeID,
+                            inputArguments: [{
+                                    dataType: node_opcua_1.DataType.String,
+                                    value: name
+                                }, {
+                                    dataType: node_opcua_1.DataType.String,
+                                    value: yn
+                                }]
+                        });
+                        session.call(methodsToCall, function (err, results) {
+                            if (err) {
+                                console.log(err);
+                            }
+                            else {
+                                console.log("ok");
+                            }
+                        });
+                        console.log("I have called the method: " + nodeID);
+                    }
+                    fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, name, 1);
+                    clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
+                    mode = node_opcua_file_transfer_1.OpenFileMode.Write;
+                    return [4 /*yield*/, clientFile.open(mode)];
+                case 5:
+                    _a.sent();
+                    question = [
+                        {
+                            type: 'input',
+                            name: 'command',
+                            message: 'What do you want to write in this node?'
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(question)];
+                case 6:
+                    risposta = _a.sent();
+                    oggettoJSON = JSON.stringify(risposta, null, '');
+                    parsedData = JSON.parse(oggettoJSON);
+                    dato = parsedData.command;
+                    dataToWrite = Buffer.from(dato);
+                    return [4 /*yield*/, clientFile.write(dataToWrite)];
+                case 7:
+                    _a.sent();
+                    _a.label = 8;
+                case 8:
+                    if (!(path.extname(name) == ".pdf")) return [3 /*break*/, 14];
+                    if (!(override == false)) return [3 /*break*/, 11];
+                    question = [
+                        {
+                            type: 'input',
+                            name: 'command',
+                            message: 'Please write the path for the .pdf file'
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(question)];
+                case 9:
+                    risposta = _a.sent();
+                    oggettoJSON = JSON.stringify(risposta, null, '');
+                    parsedData = JSON.parse(oggettoJSON);
+                    dato = parsedData.command;
+                    return [4 /*yield*/, fs.readFile(dato, 'binary', function (err, binary) {
+                            if (err) {
+                                console.log("Error, file not found");
+                                return;
+                            }
+                            else {
+                                console.log("File ok");
+                                console.log(dato);
+                            }
+                        })];
+                case 10:
+                    binary = _a.sent();
                     methodsToCall = [];
-                    nodeID = node_opcua_1.coerceNodeId("ns=1;i=1003");
+                    nodeID = node_opcua_1.coerceNodeId("ns=1;i=1006");
                     methodsToCall.push({
                         objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
                         methodId: nodeID,
@@ -554,6 +671,9 @@ function call_method(session) {
                             }, {
                                 dataType: node_opcua_1.DataType.String,
                                 value: yn
+                            }, {
+                                dataType: node_opcua_1.DataType.String,
+                                value: binary
                             }]
                     });
                     session.call(methodsToCall, function (err, results) {
@@ -561,34 +681,82 @@ function call_method(session) {
                             console.log(err);
                         }
                         else {
-                            console.log(results);
+                            console.log("ok");
                         }
                     });
                     console.log("I have called the method: " + nodeID);
-                    fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, name, 1);
-                    clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
-                    mode = node_opcua_file_transfer_1.OpenFileMode.WriteAppend;
-                    return [4 /*yield*/, clientFile.open(mode)];
-                case 3:
-                    _a.sent();
+                    return [3 /*break*/, 14];
+                case 11:
+                    if (!(override == true)) return [3 /*break*/, 14];
+                    methodToCall = [];
+                    nodeID = node_opcua_1.coerceNodeId("ns=1;s=deleteFileObject");
+                    methodToCall.push({
+                        objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
+                        methodId: nodeID,
+                        inputArguments: [{
+                                dataType: node_opcua_1.DataType.String,
+                                value: name
+                            }]
+                    });
+                    session.call(methodToCall, function (err, results) {
+                        if (err) {
+                            console.log("Errore:", err);
+                        }
+                        else {
+                            console.log("File Eliminated");
+                        }
+                    });
                     question = [
                         {
                             type: 'input',
                             name: 'command',
-                            message: 'What do you want to write in the new node?'
+                            message: 'Please write the path for the .pdf file'
                         }
                     ];
                     return [4 /*yield*/, inquirer.prompt(question)];
-                case 4:
+                case 12:
                     risposta = _a.sent();
                     oggettoJSON = JSON.stringify(risposta, null, '');
                     parsedData = JSON.parse(oggettoJSON);
                     dato = parsedData.command;
-                    dataToWrite = Buffer.from(dato);
-                    return [4 /*yield*/, clientFile.write(dataToWrite)];
-                case 5:
-                    _a.sent();
-                    return [2 /*return*/];
+                    return [4 /*yield*/, fs.readFile(dato, 'binary', function (err, binary) {
+                            if (err) {
+                                console.log("Error, file not found");
+                                return;
+                            }
+                            else {
+                                console.log("File ok");
+                            }
+                        })];
+                case 13:
+                    binary = _a.sent();
+                    methodsToCall = [];
+                    nodeID2 = node_opcua_1.coerceNodeId("ns=1;s=createFileObjectpdf");
+                    methodsToCall.push({
+                        objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
+                        methodId: nodeID2,
+                        inputArguments: [{
+                                dataType: node_opcua_1.DataType.String,
+                                value: name
+                            }, {
+                                dataType: node_opcua_1.DataType.String,
+                                value: yn
+                            }, {
+                                dataType: node_opcua_1.DataType.String,
+                                value: binary
+                            }]
+                    });
+                    session.call(methodsToCall, function (err, results) {
+                        if (err) {
+                            console.log(err);
+                        }
+                        else {
+                            console.log("ok");
+                        }
+                    });
+                    console.log("I have called the method: " + nodeID2);
+                    _a.label = 14;
+                case 14: return [2 /*return*/];
             }
         });
     });
@@ -604,7 +772,7 @@ function input() {
                             type: 'rawlist',
                             name: 'command',
                             message: 'Avaiable Commands:',
-                            choices: ["browse", "read", "write", "upload", "download", "exit"]
+                            choices: ["browse", "read", "write", "upload", "download", "delete", "exit"]
                         }
                     ];
                     return [4 /*yield*/, inquirer.prompt(questions)];
@@ -665,6 +833,55 @@ function download(session) {
                     else if (extention == ".pdf")
                         download_PDF(data, StringID);
                     console.log("File Downloaded");
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function delete_file(session) {
+    return __awaiter(this, void 0, void 0, function () {
+        var question, risposta, oggettoJSON, parsedData, name, browseResult, methodToCall, nodeID;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    question = [
+                        {
+                            type: 'input',
+                            name: 'command',
+                            message: 'What file do you want to delete?'
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(question)];
+                case 1:
+                    risposta = _a.sent();
+                    oggettoJSON = JSON.stringify(risposta, null, '');
+                    parsedData = JSON.parse(oggettoJSON);
+                    name = parsedData.command;
+                    return [4 /*yield*/, session.browse("ns=1;s=" + name)];
+                case 2:
+                    browseResult = _a.sent();
+                    if ((browseResult.references).length == 0) {
+                        console.log("Error, file does not exists!");
+                        return [2 /*return*/];
+                    }
+                    methodToCall = [];
+                    nodeID = node_opcua_1.coerceNodeId("ns=1;s=deleteFileObject");
+                    methodToCall.push({
+                        objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
+                        methodId: nodeID,
+                        inputArguments: [{
+                                dataType: node_opcua_1.DataType.String,
+                                value: name
+                            }]
+                    });
+                    session.call(methodToCall, function (err, results) {
+                        if (err) {
+                            console.log("Errore:", err);
+                        }
+                        else {
+                            console.log("File Eliminated");
+                        }
+                    });
                     return [2 /*return*/];
             }
         });
