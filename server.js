@@ -199,8 +199,8 @@ function post_initialize() {
                     dataType: opcua.DataType.String
                 },
                 {
-                    name: "binary",
-                    description: { text: "specifies if the binary of the pdf" },
+                    name: "bin",
+                    description: { text: "specifies if the bin of the pdf" },
                     dataType: opcua.DataType.String
                 }
             ],
@@ -210,13 +210,13 @@ function post_initialize() {
             try {
                 file_name = inputArguments[0].value;
                 folder = inputArguments[1].value;
-                var binary = inputArguments[2].value;
+                var bin = inputArguments[2].value;
                 console.log("I will create a file named ", file_name);
                 var nodeid = "s=" + file_name;
                 var myFile;
                 if (folder == "yes") {
                     var my_data_filename = "./server_files/Documents/" + file_name;
-                    util_1.promisify(fs.writeFile)(my_data_filename, binary, "binary");
+                    util_1.promisify(fs.writeFile)(my_data_filename, bin, "binary");
                     myFile = fileType.instantiate({
                         nodeId: nodeid,
                         browseName: file_name,
@@ -228,7 +228,7 @@ function post_initialize() {
                 }
                 else {
                     var my_data_filename = "./server_files/" + file_name;
-                    util_1.promisify(fs.writeFile)(my_data_filename, binary, "binary");
+                    util_1.promisify(fs.writeFile)(my_data_filename, bin, "binary");
                     myFile = fileType.instantiate({
                         nodeId: nodeid,
                         browseName: file_name,

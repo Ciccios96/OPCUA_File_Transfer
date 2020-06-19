@@ -229,7 +229,11 @@ async function read_file(session){
     var byte = bytes[1];
     await clientFile.setPosition(0);
     const data: Buffer = await clientFile.read(byte);
-    console.log("Contenuto del file: ", data.toString("utf-8"));
+    if(extention == ".txt"){
+        console.log("File data: ", data.toString("utf-8"));
+    }else{
+        console.log("Can't read binary file of a PDF");
+    }
     var question = [
         {
             type: 'rawlist',
@@ -458,42 +462,41 @@ async function call_method(session) {
              var parsedData = JSON.parse(oggettoJSON);
              var dato = parsedData.command;
 
-            var binary = await fs.readFile(dato,'binary',function(err,binary){
+            fs.readFile(dato,'binary',function(err,binary){
                 if (err){
                     console.log("Error, file not found");
                     return;
                 }else{
-                    console.log("File ok");
-                    console.log(binary);
+                    const methodsToCall = [];
+                    const nodeID = coerceNodeId("ns=1;i=1006");
+                    methodsToCall.push({
+                    objectId: coerceNodeId("ns=1;i=1002"),
+                    methodId: nodeID,
+                    inputArguments: [{
+                        dataType: DataType.String,
+                        value: name
+                    },{
+                        dataType: DataType.String,
+                        value:yn
+                    },{
+                        dataType: DataType.String,
+                        value:binary
+                    }]
+                    });
+                    session.call(methodsToCall, function(err,results){
+                    if (err){
+                       console.log(err);
+                       return;
+                    }
+                    else{
+                       null;
+                    }
+                    });
+                console.log("I have called the method: " + nodeID);
                 }
             });
-
-            const methodsToCall = [];
-            const nodeID = coerceNodeId("ns=1;i=1006");
-            methodsToCall.push({
-                objectId: coerceNodeId("ns=1;i=1002"),
-                methodId: nodeID,
-                inputArguments: [{
-                    dataType: DataType.String,
-                    value: name
-                },{
-                    dataType: DataType.String,
-                    value:yn
-                },{
-                    dataType: DataType.String,
-                    value:binary
-                }]
-            });
-            session.call(methodsToCall, function(err,results){
-               if (err){
-                   console.log(err);
-               }
-               else{
-                   console.log("ok");
-               }
-            });
-            console.log("I have called the method: " + nodeID);
         }
+
         else if (override == true){
             const methodToCall = [];
             const nodeID = coerceNodeId("ns=1;s=deleteFileObject");
@@ -508,6 +511,7 @@ async function call_method(session) {
             session.call(methodToCall,function(err,results){
                 if(err){
                     console.log("Errore:", err);
+                    return;
                 }
                 else{
                     null;
@@ -525,40 +529,39 @@ async function call_method(session) {
              var parsedData = JSON.parse(oggettoJSON);
              var dato = parsedData.command;
 
-            var binary = await fs.readFile(dato,'binary',function(err,binary){
+            await fs.readFile(dato,'binary',function(err,binary){
                 if (err){
                     console.log("Error, file not found");
                     return;
                 }else{
-                    console.log("File ok");
+                    const methodsToCall2 = [];
+                    const nodeID2 = coerceNodeId("ns=1;s=createFileObjectpdf");
+                    methodsToCall2.push({
+                        objectId: coerceNodeId("ns=1;i=1002"),
+                        methodId: nodeID2,
+                        inputArguments: [{
+                            dataType: DataType.String,
+                            value: name
+                        },{
+                            dataType: DataType.String,
+                            value:yn
+                        },{
+                            dataType: DataType.String,
+                            value:binary
+                        }]
+                    });
+                    session.call(methodsToCall2, function(err,results){
+                       if (err){
+                           console.log(err);
+                           return;
+                       }
+                       else{
+                           null;
+                       }
+                    });
+                    console.log("I have called the method: " + nodeID2);
                 }
             });
-
-            const methodsToCall2 = [];
-            const nodeID2 = coerceNodeId("ns=1;s=createFileObjectpdf");
-            methodsToCall2.push({
-                objectId: coerceNodeId("ns=1;i=1002"),
-                methodId: nodeID2,
-                inputArguments: [{
-                    dataType: DataType.String,
-                    value: name
-                },{
-                    dataType: DataType.String,
-                    value:yn
-                },{
-                    dataType: DataType.String,
-                    value:binary
-                }]
-            });
-            session.call(methodsToCall2, function(err,results){
-               if (err){
-                   console.log(err);
-               }
-               else{
-                   console.log("ok");
-               }
-            });
-            console.log("I have called the method: " + nodeID2);
         }
         }
 }

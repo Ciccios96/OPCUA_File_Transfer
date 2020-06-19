@@ -345,7 +345,12 @@ function read_file(session) {
                     return [4 /*yield*/, clientFile.read(byte)];
                 case 6:
                     data = _a.sent();
-                    console.log("Contenuto del file: ", data.toString("utf-8"));
+                    if (extention == ".txt") {
+                        console.log("File data: ", data.toString("utf-8"));
+                    }
+                    else {
+                        console.log("Can't read binary file of a PDF");
+                    }
                     question = [
                         {
                             type: 'rawlist',
@@ -525,7 +530,7 @@ function ending(session, client) {
 }
 function call_method(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var override, questions, risposta, oggettoJSON, parsedData, name, yn, browseResult, override_question, risposta, oggettoJSON, parsedData, methodsToCall, nodeID, fileNodeId, clientFile, mode, question, risposta, parsedData, dato, dataToWrite, question, risposta, parsedData, dato, binary, methodsToCall, nodeID, methodToCall, nodeID, question, risposta, parsedData, dato, binary, methodsToCall, nodeID2;
+        var override, questions, risposta, oggettoJSON, parsedData, name, yn, browseResult, override_question, risposta, oggettoJSON, parsedData, methodsToCall, nodeID, fileNodeId, clientFile, mode, question, risposta, parsedData, dato, dataToWrite, question, risposta, parsedData, dato, methodToCall, nodeID, question, risposta, parsedData, dato;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -633,8 +638,8 @@ function call_method(session) {
                     _a.sent();
                     _a.label = 8;
                 case 8:
-                    if (!(path.extname(name) == ".pdf")) return [3 /*break*/, 14];
-                    if (!(override == false)) return [3 /*break*/, 11];
+                    if (!(path.extname(name) == ".pdf")) return [3 /*break*/, 13];
+                    if (!(override == false)) return [3 /*break*/, 10];
                     question = [
                         {
                             type: 'input',
@@ -648,46 +653,43 @@ function call_method(session) {
                     oggettoJSON = JSON.stringify(risposta, null, '');
                     parsedData = JSON.parse(oggettoJSON);
                     dato = parsedData.command;
-                    return [4 /*yield*/, fs.readFile(dato, 'binary', function (err, binary) {
-                            if (err) {
-                                console.log("Error, file not found");
-                                return;
-                            }
-                            else {
-                                console.log("File ok");
-                                console.log(dato);
-                            }
-                        })];
-                case 10:
-                    binary = _a.sent();
-                    methodsToCall = [];
-                    nodeID = node_opcua_1.coerceNodeId("ns=1;i=1006");
-                    methodsToCall.push({
-                        objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
-                        methodId: nodeID,
-                        inputArguments: [{
-                                dataType: node_opcua_1.DataType.String,
-                                value: name
-                            }, {
-                                dataType: node_opcua_1.DataType.String,
-                                value: yn
-                            }, {
-                                dataType: node_opcua_1.DataType.String,
-                                value: binary
-                            }]
-                    });
-                    session.call(methodsToCall, function (err, results) {
+                    fs.readFile(dato, 'binary', function (err, binary) {
                         if (err) {
-                            console.log(err);
+                            console.log("Error, file not found");
+                            return;
                         }
                         else {
-                            console.log("ok");
+                            var methodsToCall = [];
+                            var nodeID = node_opcua_1.coerceNodeId("ns=1;i=1006");
+                            methodsToCall.push({
+                                objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
+                                methodId: nodeID,
+                                inputArguments: [{
+                                        dataType: node_opcua_1.DataType.String,
+                                        value: name
+                                    }, {
+                                        dataType: node_opcua_1.DataType.String,
+                                        value: yn
+                                    }, {
+                                        dataType: node_opcua_1.DataType.String,
+                                        value: binary
+                                    }]
+                            });
+                            session.call(methodsToCall, function (err, results) {
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                                else {
+                                    null;
+                                }
+                            });
+                            console.log("I have called the method: " + nodeID);
                         }
                     });
-                    console.log("I have called the method: " + nodeID);
-                    return [3 /*break*/, 14];
-                case 11:
-                    if (!(override == true)) return [3 /*break*/, 14];
+                    return [3 /*break*/, 13];
+                case 10:
+                    if (!(override == true)) return [3 /*break*/, 13];
                     methodToCall = [];
                     nodeID = node_opcua_1.coerceNodeId("ns=1;s=deleteFileObject");
                     methodToCall.push({
@@ -701,9 +703,10 @@ function call_method(session) {
                     session.call(methodToCall, function (err, results) {
                         if (err) {
                             console.log("Errore:", err);
+                            return;
                         }
                         else {
-                            console.log("File Eliminated");
+                            null;
                         }
                     });
                     question = [
@@ -714,7 +717,7 @@ function call_method(session) {
                         }
                     ];
                     return [4 /*yield*/, inquirer.prompt(question)];
-                case 12:
+                case 11:
                     risposta = _a.sent();
                     oggettoJSON = JSON.stringify(risposta, null, '');
                     parsedData = JSON.parse(oggettoJSON);
@@ -725,38 +728,38 @@ function call_method(session) {
                                 return;
                             }
                             else {
-                                console.log("File ok");
+                                var methodsToCall2 = [];
+                                var nodeID2 = node_opcua_1.coerceNodeId("ns=1;s=createFileObjectpdf");
+                                methodsToCall2.push({
+                                    objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
+                                    methodId: nodeID2,
+                                    inputArguments: [{
+                                            dataType: node_opcua_1.DataType.String,
+                                            value: name
+                                        }, {
+                                            dataType: node_opcua_1.DataType.String,
+                                            value: yn
+                                        }, {
+                                            dataType: node_opcua_1.DataType.String,
+                                            value: binary
+                                        }]
+                                });
+                                session.call(methodsToCall2, function (err, results) {
+                                    if (err) {
+                                        console.log(err);
+                                        return;
+                                    }
+                                    else {
+                                        null;
+                                    }
+                                });
+                                console.log("I have called the method: " + nodeID2);
                             }
                         })];
-                case 13:
-                    binary = _a.sent();
-                    methodsToCall = [];
-                    nodeID2 = node_opcua_1.coerceNodeId("ns=1;s=createFileObjectpdf");
-                    methodsToCall.push({
-                        objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
-                        methodId: nodeID2,
-                        inputArguments: [{
-                                dataType: node_opcua_1.DataType.String,
-                                value: name
-                            }, {
-                                dataType: node_opcua_1.DataType.String,
-                                value: yn
-                            }, {
-                                dataType: node_opcua_1.DataType.String,
-                                value: binary
-                            }]
-                    });
-                    session.call(methodsToCall, function (err, results) {
-                        if (err) {
-                            console.log(err);
-                        }
-                        else {
-                            console.log("ok");
-                        }
-                    });
-                    console.log("I have called the method: " + nodeID2);
-                    _a.label = 14;
-                case 14: return [2 /*return*/];
+                case 12:
+                    _a.sent();
+                    _a.label = 13;
+                case 13: return [2 /*return*/];
             }
         });
     });
