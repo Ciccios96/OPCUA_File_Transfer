@@ -591,7 +591,7 @@ function call_method(session) {
                     if (!(path.extname(name) == ".txt")) return [3 /*break*/, 8];
                     if (override == false) {
                         methodsToCall = [];
-                        nodeID = node_opcua_1.coerceNodeId("ns=1;i=1003");
+                        nodeID = node_opcua_1.coerceNodeId("ns=1;s=createFileObjecttxt");
                         methodsToCall.push({
                             objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
                             methodId: nodeID,
@@ -606,9 +606,10 @@ function call_method(session) {
                         session.call(methodsToCall, function (err, results) {
                             if (err) {
                                 console.log(err);
+                                return;
                             }
                             else {
-                                console.log("ok");
+                                null;
                             }
                         });
                         console.log("I have called the method: " + nodeID);
@@ -684,7 +685,6 @@ function call_method(session) {
                                     null;
                                 }
                             });
-                            console.log("I have called the method: " + nodeID);
                         }
                     });
                     return [3 /*break*/, 12];
@@ -753,7 +753,6 @@ function call_method(session) {
                                     null;
                                 }
                             });
-                            console.log("I have called the method: " + nodeID2);
                         }
                     });
                     _a.label = 12;
@@ -829,10 +828,12 @@ function download(session) {
                     return [4 /*yield*/, clientFile.read(byte)];
                 case 6:
                     data = _a.sent();
-                    if (extention == ".txt")
+                    if (extention == ".txt") {
                         download_file(data, StringID);
-                    else if (extention == ".pdf")
+                    }
+                    else if (extention == ".pdf") {
                         download_PDF(data, StringID);
+                    }
                     console.log("File Downloaded");
                     return [2 /*return*/];
             }

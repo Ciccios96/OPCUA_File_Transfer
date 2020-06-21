@@ -403,7 +403,7 @@ async function call_method(session) {
     if(path.extname(name) == ".txt"){
         if(override == false){
             const methodsToCall = [];
-            const nodeID = coerceNodeId("ns=1;i=1003");
+            const nodeID = coerceNodeId("ns=1;s=createFileObjecttxt");
             methodsToCall.push({
                 objectId: coerceNodeId("ns=1;i=1002"),
                 methodId: nodeID,
@@ -418,9 +418,10 @@ async function call_method(session) {
             session.call(methodsToCall, function(err,results){
                if (err){
                    console.log(err);
+                   return;
                }
                else{
-                   console.log("ok");
+                   null;
                }
             });
             console.log("I have called the method: " + nodeID);
@@ -492,10 +493,10 @@ async function call_method(session) {
                        null;
                     }
                     });
-                console.log("I have called the method: " + nodeID);
                 }
             });
         }
+        
 
         else if (override == true){
             const methodToCall = [];
@@ -559,7 +560,6 @@ async function call_method(session) {
                        null;
                     }
                     });
-                    console.log("I have called the method: " + nodeID2);
                 }
             });
         }
@@ -614,10 +614,12 @@ async function download(session){
     await clientFile.setPosition(0);
     const data: Buffer = await clientFile.read(byte);
 
-    if(extention == ".txt")
+    if(extention == ".txt"){
     download_file(data,StringID);
-    else if (extention == ".pdf")
+    }
+    else if (extention == ".pdf"){
     download_PDF(data,StringID);
+    }
     console.log("File Downloaded");
 }
 

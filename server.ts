@@ -60,6 +60,7 @@ function post_initialize() {
         //creazione metodo createFileObject
         const method = namespace.addMethod(objectFile,{
 
+            nodeId: "s=createFileObjecttxt",
             browseName: "createFileObjecttxt",
         
             inputArguments:  [
@@ -183,17 +184,19 @@ function post_initialize() {
                         var filenames = filename;
                         var more_files=fs.readdirSync(filenames);
                         console.log(filenames);
-                        for(var i=0;i<more_files.length;i++){
-                            var filenames=path.join(filenames,more_files[i]);
-                            if (more_files[i] == fileName){
+                        for(var j=0;j<more_files.length;j++){
+                            var filenames=path.join(filenames,more_files[j]);
+                            if (more_files[j] == fileName){
                                 const my_data_filename = path.join(__dirname,"./server_files/Documents/" + fileName);
                                 promisify(fs.unlink)(my_data_filename);
+                                console.log("eliminated " + my_data_filename);
                             }
                         }
                     }
                     else if (files[i] == fileName) {
                         const my_data_filename = path.join(__dirname,"./server_files/" + fileName);
                         promisify(fs.unlink)(my_data_filename);
+                        console.log("eliminated " + my_data_filename);
                     };
                 };
 
