@@ -638,7 +638,7 @@ function call_method(session) {
                     _a.sent();
                     _a.label = 8;
                 case 8:
-                    if (!(path.extname(name) == ".pdf")) return [3 /*break*/, 13];
+                    if (!(path.extname(name) == ".pdf")) return [3 /*break*/, 12];
                     if (!(override == false)) return [3 /*break*/, 10];
                     question = [
                         {
@@ -660,7 +660,7 @@ function call_method(session) {
                         }
                         else {
                             var methodsToCall = [];
-                            var nodeID = node_opcua_1.coerceNodeId("ns=1;i=1006");
+                            var nodeID = node_opcua_1.coerceNodeId("ns=1;s=createFileObjectpdf");
                             methodsToCall.push({
                                 objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
                                 methodId: nodeID,
@@ -687,9 +687,9 @@ function call_method(session) {
                             console.log("I have called the method: " + nodeID);
                         }
                     });
-                    return [3 /*break*/, 13];
+                    return [3 /*break*/, 12];
                 case 10:
-                    if (!(override == true)) return [3 /*break*/, 13];
+                    if (!(override == true)) return [3 /*break*/, 12];
                     methodToCall = [];
                     nodeID = node_opcua_1.coerceNodeId("ns=1;s=deleteFileObject");
                     methodToCall.push({
@@ -722,44 +722,42 @@ function call_method(session) {
                     oggettoJSON = JSON.stringify(risposta, null, '');
                     parsedData = JSON.parse(oggettoJSON);
                     dato = parsedData.command;
-                    return [4 /*yield*/, fs.readFile(dato, 'binary', function (err, binary) {
-                            if (err) {
-                                console.log("Error, file not found");
-                                return;
-                            }
-                            else {
-                                var methodsToCall2 = [];
-                                var nodeID2 = node_opcua_1.coerceNodeId("ns=1;s=createFileObjectpdf");
-                                methodsToCall2.push({
-                                    objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
-                                    methodId: nodeID2,
-                                    inputArguments: [{
-                                            dataType: node_opcua_1.DataType.String,
-                                            value: name
-                                        }, {
-                                            dataType: node_opcua_1.DataType.String,
-                                            value: yn
-                                        }, {
-                                            dataType: node_opcua_1.DataType.String,
-                                            value: binary
-                                        }]
-                                });
-                                session.call(methodsToCall2, function (err, results) {
-                                    if (err) {
-                                        console.log(err);
-                                        return;
-                                    }
-                                    else {
-                                        null;
-                                    }
-                                });
-                                console.log("I have called the method: " + nodeID2);
-                            }
-                        })];
-                case 12:
-                    _a.sent();
-                    _a.label = 13;
-                case 13: return [2 /*return*/];
+                    fs.readFile(dato, 'binary', function (err, binary) {
+                        if (err) {
+                            console.log("Error, file not found");
+                            return;
+                        }
+                        else {
+                            var methodsToCall = [];
+                            var nodeID2 = node_opcua_1.coerceNodeId("ns=1;s=createFileObjectpdf");
+                            methodsToCall.push({
+                                objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
+                                methodId: nodeID2,
+                                inputArguments: [{
+                                        dataType: node_opcua_1.DataType.String,
+                                        value: name
+                                    }, {
+                                        dataType: node_opcua_1.DataType.String,
+                                        value: yn
+                                    }, {
+                                        dataType: node_opcua_1.DataType.String,
+                                        value: binary
+                                    }]
+                            });
+                            session.call(methodsToCall, function (err, results) {
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                }
+                                else {
+                                    null;
+                                }
+                            });
+                            console.log("I have called the method: " + nodeID2);
+                        }
+                    });
+                    _a.label = 12;
+                case 12: return [2 /*return*/];
             }
         });
     });

@@ -16,7 +16,7 @@ const server = new opcua.OPCUAServer({
     resourcePath: "/UA/FileTransfer", // this path will be added to the endpoint resource name
     serverCertificateManager: new opcua.OPCUACertificateManager({
         automaticallyAcceptUnknownCertificate: true,
-        rootFolder: path.join(__dirname,"../certs")
+        rootFolder: path.join(__dirname,"./certs")
     }),
     buildInfo : {
         productName: "FileTransfer1",
@@ -216,7 +216,8 @@ function post_initialize() {
         });
 
         const method3 = namespace.addMethod(objectFile,{
-
+            
+            nodeId: "s=createFileObjectpdf",
             browseName: "createFileObjectpdf",
         
             inputArguments:  [
@@ -285,7 +286,7 @@ function post_initialize() {
                 callMethodResult = {
                     statusCode: opcua.StatusCodes.Good,
                     outputArguments: []
-                };
+                }
             }catch
             {   
                 if (folder == "yes"){
@@ -294,7 +295,7 @@ function post_initialize() {
                         if(err){
                             console.log(err);
                         }
-                    })
+                    });
                 }
                 else {
                     var my_data_filename = "./server_files/"+ file_name;
@@ -302,13 +303,13 @@ function post_initialize() {
                         if(err){
                             console.log(err);
                         }
-                    })
+                    });
                 }
                 console.log("Error on node creation");      
                 callMethodResult = {
                 statusCode: opcua.StatusCodes.Bad,
                 outputArguments: []
-            };
+            }
             }
             finally 
             {

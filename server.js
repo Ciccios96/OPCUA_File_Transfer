@@ -16,7 +16,7 @@ var server = new opcua.OPCUAServer({
     resourcePath: "/UA/FileTransfer",
     serverCertificateManager: new opcua.OPCUACertificateManager({
         automaticallyAcceptUnknownCertificate: true,
-        rootFolder: path.join(__dirname, "../certs")
+        rootFolder: path.join(__dirname, "./certs")
     }),
     buildInfo: {
         productName: "FileTransfer1",
@@ -186,6 +186,7 @@ function post_initialize() {
             }
         });
         var method3 = namespace.addMethod(objectFile, {
+            nodeId: "s=createFileObjectpdf",
             browseName: "createFileObjectpdf",
             inputArguments: [
                 {

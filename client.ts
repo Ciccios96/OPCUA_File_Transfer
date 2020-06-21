@@ -468,7 +468,7 @@ async function call_method(session) {
                     return;
                 }else{
                     const methodsToCall = [];
-                    const nodeID = coerceNodeId("ns=1;i=1006");
+                    const nodeID = coerceNodeId("ns=1;s=createFileObjectpdf");
                     methodsToCall.push({
                     objectId: coerceNodeId("ns=1;i=1002"),
                     methodId: nodeID,
@@ -529,35 +529,35 @@ async function call_method(session) {
              var parsedData = JSON.parse(oggettoJSON);
              var dato = parsedData.command;
 
-            await fs.readFile(dato,'binary',function(err,binary){
+            fs.readFile(dato,'binary',function(err,binary){
                 if (err){
                     console.log("Error, file not found");
                     return;
                 }else{
-                    const methodsToCall2 = [];
+                    const methodsToCall = [];
                     const nodeID2 = coerceNodeId("ns=1;s=createFileObjectpdf");
-                    methodsToCall2.push({
-                        objectId: coerceNodeId("ns=1;i=1002"),
-                        methodId: nodeID2,
-                        inputArguments: [{
-                            dataType: DataType.String,
-                            value: name
-                        },{
-                            dataType: DataType.String,
-                            value:yn
-                        },{
-                            dataType: DataType.String,
-                            value:binary
-                        }]
+                    methodsToCall.push({
+                    objectId: coerceNodeId("ns=1;i=1002"),
+                    methodId: nodeID2,
+                    inputArguments: [{
+                        dataType: DataType.String,
+                        value: name
+                    },{
+                        dataType: DataType.String,
+                        value:yn
+                    },{
+                        dataType: DataType.String,
+                        value:binary
+                    }]
                     });
-                    session.call(methodsToCall2, function(err,results){
-                       if (err){
-                           console.log(err);
-                           return;
-                       }
-                       else{
-                           null;
-                       }
+                    session.call(methodsToCall, function(err,results){
+                    if (err){
+                       console.log(err);
+                       return;
+                    }
+                    else{
+                       null;
+                    }
                     });
                     console.log("I have called the method: " + nodeID2);
                 }
