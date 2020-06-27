@@ -383,7 +383,9 @@ function read_file(session) {
                             break;
                     }
                     return [3 /*break*/, 7];
-                case 9: return [2 /*return*/];
+                case 9:
+                    console.log("Operation Succesful");
+                    return [2 /*return*/];
             }
         });
     });
@@ -502,6 +504,7 @@ function write_file(session) {
                     return [4 /*yield*/, clientFile.write(dataToWrite)];
                 case 11:
                     _a.sent();
+                    console.log("Operation Succesful");
                     return [2 /*return*/];
             }
         });
@@ -756,7 +759,9 @@ function call_method(session) {
                         }
                     });
                     _a.label = 12;
-                case 12: return [2 /*return*/];
+                case 12:
+                    console.log("Operation Succesful");
+                    return [2 /*return*/];
             }
         });
     });
