@@ -262,6 +262,7 @@ async function read_file(session){
                 break;
         }
     }
+    console.log("Operation Succesful");
 }
 
 async function download_file(data,StringID){
@@ -338,6 +339,8 @@ async function write_file(session){
     
     const dataToWrite = Buffer.from(dato);
     await clientFile.write(dataToWrite);
+
+    console.log("Operation Succesful");
 }
 
 async function ending(session,client){
@@ -564,6 +567,7 @@ async function call_method(session) {
             });
         }
         }
+    console.log("Operation Succesful");
 }
 
 async function input(){
