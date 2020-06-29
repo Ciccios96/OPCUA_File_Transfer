@@ -535,7 +535,7 @@ function ending(session, client) {
 }
 function create_file(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var override, questions, risposta, oggettoJSON, parsedData, name, yn, browseResult, override_question, risposta, oggettoJSON, parsedData, yn_override, question, risposta, parsedData, dato, methodToCall, nodeID, question, risposta, parsedData, dato;
+        var override, questions, risposta, oggettoJSON, parsedData, name, yn, extension, browseResult, override_question, risposta, oggettoJSON, parsedData, yn_override, question, risposta, parsedData, dato, methodToCall, nodeID, question, risposta, parsedData, dato;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -560,6 +560,11 @@ function create_file(session) {
                     parsedData = JSON.parse(oggettoJSON);
                     name = parsedData.command;
                     yn = parsedData.command2;
+                    extension = path.extname(name);
+                    if (!/\.(jpe?g|png|gif|bmp|docx|pdf|txt|pptx)$/i.test(name + extension)) {
+                        console.log("This file is not supported");
+                        return [2 /*return*/];
+                    }
                     return [4 /*yield*/, session.browse("ns=1;s=" + name)];
                 case 2:
                     browseResult = _a.sent();
