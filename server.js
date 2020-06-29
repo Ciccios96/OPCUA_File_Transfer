@@ -487,20 +487,20 @@ function post_initialize() {
                     var myFile = fileType.instantiate({
                         nodeId: "s=" + fileName_1,
                         browseName: fileName_1,
-                        organizedBy: FileSystem
+                        organizedBy: Documents
                     });
                     file_transfer.installFileType(myFile, {
-                        filename: "./server_files/" + fileName_1
+                        filename: "./server_files/Documents/" + fileName_1
                     });
                 }
                 else if (documents == true) {
                     var myFile = fileType.instantiate({
                         nodeId: "s=" + fileName_1,
                         browseName: fileName_1,
-                        organizedBy: Documents
+                        organizedBy: FileSystem
                     });
                     file_transfer.installFileType(myFile, {
-                        filename: "./server_files/Documents/" + fileName_1
+                        filename: "./server_files/" + fileName_1
                     });
                 }
                 var callMethodResult = {

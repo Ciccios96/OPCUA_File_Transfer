@@ -495,22 +495,22 @@ function post_initialize() {
                     const myFile = fileType.instantiate({
                         nodeId: "s=" + fileName,
                         browseName: fileName,
-                        organizedBy: FileSystem
+                        organizedBy: Documents
                     })
                         
                     file_transfer.installFileType(myFile, { 
-                        filename: "./server_files/" + fileName
+                        filename: "./server_files/Documents/" + fileName
                     });
                 }
                 else if(documents == true){
                     const myFile = fileType.instantiate({
                     nodeId: "s=" + fileName,
                     browseName: fileName,
-                    organizedBy: Documents
+                    organizedBy: FileSystem
                 })
                     
                     file_transfer.installFileType(myFile, { 
-                        filename: "./server_files/Documents/" + fileName
+                        filename: "./server_files/" + fileName
                     });
                 }
             
