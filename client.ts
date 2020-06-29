@@ -152,6 +152,11 @@ async function main() {
             case "delete":
                 await delete_file(session);
                 break;
+            case "rename":
+                await rename(session);
+                break;
+            case "move":
+                break;
             default:
                 console.log("Wrong Input, retry");
                 break;
@@ -210,7 +215,7 @@ async function read_file(session){
     const oggettoJSON = JSON.stringify(risposta,null,'');
     var parsedData = JSON.parse(oggettoJSON);
     var StringID = parsedData.command;
-    var extention = path.extname(StringID);
+    var extension = path.extname(StringID);
 
     var browseResult = await session.browse("ns=1;s=" + StringID);
     if ((browseResult.references).length == 0) {
@@ -229,7 +234,7 @@ async function read_file(session){
     var byte = bytes[1];
     await clientFile.setPosition(0);
     const data: Buffer = await clientFile.read(byte);
-    if(extention == ".txt"){
+    if(extension == ".txt"){
         console.log("File data: ", data.toString("utf-8"));
     }else{
         console.log("Can't read binary file of a PDF");
@@ -249,7 +254,7 @@ async function read_file(session){
     var risposta = parsedData.command;
     switch(risposta){
         case "yes":
-            if(extention == ".txt")
+            if(extension == ".txt")
                 download_file_txt(data,StringID);
             else
                 download_file(data,StringID);
@@ -372,6 +377,12 @@ async function create_file(session) {
     var parsedData = JSON.parse(oggettoJSON);
     var name = parsedData.command;
     var yn = parsedData.command2;
+    var extension = path.extname(name);
+
+    if(! /\.(jpe?g|png|gif|bmp|docx|pdf|txt|pptx)$/i.test(name + extension)){
+        console.log("This file is not supported");
+        return
+    }
 
     var browseResult = await session.browse("ns=1;s=" + name);
     if ((browseResult.references).length > 0) {
@@ -518,7 +529,7 @@ async function input(){
             type: 'rawlist',
             name: 'command',
             message: 'Avaiable Commands:',
-            choices: ["browse","read","write","upload","download","delete","exit"]
+            choices: ["browse","read","write","upload","download","delete","rename","exit"]
         }
     ];
     risposta = await inquirer.prompt(questions);
@@ -539,7 +550,7 @@ async function download(session){
     const oggettoJSON = JSON.stringify(risposta,null,'');
     var parsedData = JSON.parse(oggettoJSON);
     var StringID = parsedData.command;
-    var extention = path.extname(StringID);
+    var extension = path.extname(StringID);
 
     var browseResult = await session.browse("ns=1;s=" + StringID);
     if ((browseResult.references).length == 0) {
@@ -559,7 +570,7 @@ async function download(session){
     await clientFile.setPosition(0);
     const data: Buffer = await clientFile.read(byte);
 
-    if(extention == ".txt"){
+    if(extension == ".txt"){
         download_file_txt(data,StringID);
     }
     else {
@@ -603,4 +614,64 @@ async function delete_file(session){
         }
     });
     console.log("File Eliminated");
+}
+
+async function rename(session){
+    var questions = [
+        {
+            type: 'input',
+            name: 'command',
+            message: 'What node do you want to rename?'
+        }
+    ];
+    var risposta = await inquirer.prompt(questions);
+    const oggettoJSON = JSON.stringify(risposta,null,'');
+    var parsedData = JSON.parse(oggettoJSON);
+    var StringID = parsedData.command;
+    var extension = path.extname(StringID);
+
+    var browseResult = await session.browse("ns=1;s=" + StringID);
+    if ((browseResult.references).length == 0) {
+        console.log("Error, file does not exists!");
+        return;
+    }
+
+    var questions = [
+        {
+            type: 'input',
+            name: 'command',
+            message: 'Please write the new name'
+        }
+    ];
+    var risposta = await inquirer.prompt(questions);
+    const oggettoJSON2 = JSON.stringify(risposta,null,'');
+    var parsedData = JSON.parse(oggettoJSON2);
+    var new_name = parsedData.command;
+    var extension2 = path.extname(new_name);
+
+    if(extension != extension2){
+        console.log("The renamed file must have the same extension!");
+        return;
+    }
+
+    const methodToCall = [];
+    const nodeID = coerceNodeId("ns=1;s=renameFileObject");
+    methodToCall.push({
+        objectId: coerceNodeId("ns=1;i=1002"),
+        methodId: nodeID,
+        inputArguments: [{
+            dataType: DataType.String,
+            value: StringID
+        },
+        {
+            dataType: DataType.String,
+            value: new_name
+        }]
+    });
+    session.call(methodToCall,function(err,results){
+        if(err){
+            console.log("Errore:", err);
+        }
+    });
+    console.log("File Renamed");
 }

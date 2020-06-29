@@ -48,8 +48,8 @@ function post_initialize() {
         });
         //creazione metodo createFileObject
         var method = namespace.addMethod(objectFile, {
-            nodeId: "s=createFileObjecttxt",
-            browseName: "createFileObjecttxt",
+            nodeId: "s=createFileObjectTxt",
+            browseName: "createFileObjectTxt",
             inputArguments: [
                 {
                     name: "filename",
@@ -189,8 +189,8 @@ function post_initialize() {
             }
         });
         var method3 = namespace.addMethod(objectFile, {
-            nodeId: "s=createFileObjectpdf",
-            browseName: "createFileObjectpdf",
+            nodeId: "s=createFileObject",
+            browseName: "createFileObject",
             inputArguments: [
                 {
                     name: "filename",
@@ -269,6 +269,102 @@ function post_initialize() {
                 console.log("Error on node creation");
                 callMethodResult = {
                     statusCode: opcua.StatusCodes.Bad,
+                    outputArguments: []
+                };
+            }
+            finally {
+                callback(null, callMethodResult);
+            }
+        });
+        //creazione metodo renameFileObject
+        var renameFileObject = namespace.addMethod(objectFile, {
+            nodeId: "s=renameFileObject",
+            browseName: "renameFileObject",
+            inputArguments: [
+                {
+                    name: "filename",
+                    description: { text: "specifies the name of the File" },
+                    dataType: opcua.DataType.String
+                },
+                {
+                    name: "newName",
+                    description: { text: "specifies the new name" },
+                    dataType: opcua.DataType.String
+                }
+            ],
+            outputArguments: []
+        });
+        renameFileObject.bindMethod(function (inputArguments, context, callback) {
+            try {
+                var fileName = inputArguments[0].value;
+                var newName = inputArguments[1].value;
+                var documents = false;
+                var my_new_data_filename;
+                var fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, fileName, 1);
+                var files = fs.readdirSync(startPath);
+                for (var i = 0; i < files.length; i++) {
+                    var filename = path.join(startPath, files[i]);
+                    var stat = fs.lstatSync(filename);
+                    if (stat.isDirectory()) {
+                        var filenames = filename;
+                        var more_files = fs.readdirSync(filenames);
+                        console.log(filenames);
+                        for (var j = 0; j < more_files.length; j++) {
+                            var filenames = path.join(filenames, more_files[j]);
+                            if (more_files[j] == fileName) {
+                                documents = true;
+                                var my_data_filename = path.join(__dirname, "./server_files/Documents/" + fileName);
+                                my_new_data_filename = "./server_files/Documents/" + newName;
+                                fs.rename(my_data_filename, my_new_data_filename, function (err) {
+                                    if (err)
+                                        console.log('ERROR: ' + err);
+                                });
+                                console.log("modified name");
+                            }
+                        }
+                    }
+                    else if (files[i] == fileName) {
+                        documents = false;
+                        var my_data_filename = path.join(__dirname, "./server_files/" + fileName);
+                        my_new_data_filename = "./server_files/" + newName;
+                        fs.rename(my_data_filename, my_new_data_filename, function (err) {
+                            if (err)
+                                console.log('ERROR: ' + err);
+                        });
+                        console.log("modified name");
+                    }
+                    ;
+                }
+                ;
+                namespace.deleteNode(fileNodeId);
+                if (documents == false) {
+                    var myFile = fileType.instantiate({
+                        nodeId: "s=" + newName,
+                        browseName: newName,
+                        organizedBy: FileSystem
+                    });
+                    file_transfer.installFileType(myFile, {
+                        filename: my_new_data_filename
+                    });
+                }
+                else {
+                    var myFile = fileType.instantiate({
+                        nodeId: "s=" + newName,
+                        browseName: newName,
+                        organizedBy: Documents
+                    });
+                    file_transfer.installFileType(myFile, {
+                        filename: my_new_data_filename
+                    });
+                }
+                var callMethodResult = {
+                    statusCode: node_opcua_1.StatusCodes.Good,
+                    outputArguments: []
+                };
+            }
+            catch (_a) {
+                var callMethodResult = {
+                    statusCode: node_opcua_1.StatusCodes.Bad,
                     outputArguments: []
                 };
             }

@@ -320,6 +320,110 @@ function post_initialize() {
             }
         });
 
+        //creazione metodo renameFileObject
+        const renameFileObject = namespace.addMethod(objectFile,{
+
+            nodeId: "s=renameFileObject",
+            browseName: "renameFileObject",
+                
+            inputArguments:  [
+                {
+                    name:"filename",
+                    description: { text: "specifies the name of the File" },
+                    dataType: opcua.DataType.String        
+                },
+                {
+                    name:"newName",
+                    description: { text: "specifies the new name"},
+                    dataType: opcua.DataType.String
+                }
+                ],
+                outputArguments: []
+            });
+        
+        renameFileObject.bindMethod((inputArguments,context,callback) =>{
+            try{
+                const fileName = inputArguments[0].value;
+        
+                const newName = inputArguments[1].value;
+        
+                var documents = false;
+        
+                var my_new_data_filename;
+        
+                const fileNodeId = new NodeId(NodeIdType.STRING,fileName,1);
+                        
+                var files=fs.readdirSync(startPath);
+                for(var i=0;i<files.length;i++){
+                    var filename=path.join(startPath,files[i]);
+                    var stat = fs.lstatSync(filename);
+                    if (stat.isDirectory()){
+                        var filenames = filename;
+                        var more_files=fs.readdirSync(filenames);
+                        console.log(filenames);
+                        for(var j=0;j<more_files.length;j++){
+                            var filenames=path.join(filenames,more_files[j]);
+                            if (more_files[j] == fileName){
+                                documents = true;
+                                const my_data_filename = path.join(__dirname,"./server_files/Documents/" + fileName);
+                                my_new_data_filename = "./server_files/Documents/" + newName;
+                                fs.rename(my_data_filename, my_new_data_filename, function(err) {
+                                    if ( err ) console.log('ERROR: ' + err);
+                                });
+                                console.log("modified name");
+                            }
+                        }
+                    }
+                    else if (files[i] == fileName) {
+                        documents = false;
+                        const my_data_filename = path.join(__dirname,"./server_files/" + fileName);
+                        my_new_data_filename = "./server_files/" + newName;
+                        fs.rename(my_data_filename, my_new_data_filename, function(err) {
+                            if ( err ) console.log('ERROR: ' + err);
+                        });
+                        console.log("modified name");
+                    };
+                };
+        
+                namespace.deleteNode(fileNodeId);
+        
+                if (documents == false){
+                    const myFile = fileType.instantiate({
+                        nodeId: "s=" + newName,
+                        browseName: newName,
+                        organizedBy: FileSystem
+                    })
+                    
+                    file_transfer.installFileType(myFile, { 
+                        filename: my_new_data_filename
+                    });
+                }
+                else {
+                    const myFile = fileType.instantiate({
+                    nodeId: "s=" + newName,
+                    browseName: newName,
+                    organizedBy: Documents
+                })
+                
+                    file_transfer.installFileType(myFile, { 
+                        filename: my_new_data_filename
+                    });
+                }
+        
+                var callMethodResult = {
+                    statusCode: StatusCodes.Good,
+                    outputArguments: []
+                }
+            }catch{
+                var callMethodResult = {
+                    statusCode: StatusCodes.Bad,
+                    outputArguments: []
+                }
+            }finally{
+                callback(null,callMethodResult);
+            }
+        });
+
     }
     construct_my_address_space(server);
     server.start(function() {
