@@ -377,12 +377,6 @@ async function create_file(session) {
     var parsedData = JSON.parse(oggettoJSON);
     var name = parsedData.command;
     var yn = parsedData.command2;
-    var extension = path.extname(name);
-
-    if(! /\.(jpe?g|png|gif|bmp|docx|pdf|txt|pptx)$/i.test(name + extension)){
-        console.log("This file is not supported");
-        return
-    }
 
     var browseResult = await session.browse("ns=1;s=" + name);
     if ((browseResult.references).length > 0) {
