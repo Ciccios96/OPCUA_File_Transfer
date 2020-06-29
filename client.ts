@@ -156,6 +156,7 @@ async function main() {
                 await rename(session);
                 break;
             case "move":
+                await move(session);
                 break;
             default:
                 console.log("Wrong Input, retry");
@@ -529,7 +530,7 @@ async function input(){
             type: 'rawlist',
             name: 'command',
             message: 'Avaiable Commands:',
-            choices: ["browse","read","write","upload","download","delete","rename","exit"]
+            choices: ["browse","read","write","upload","download","delete","rename","move","exit"]
         }
     ];
     risposta = await inquirer.prompt(questions);
@@ -621,7 +622,7 @@ async function rename(session){
         {
             type: 'input',
             name: 'command',
-            message: 'What node do you want to rename?'
+            message: 'What file do you want to rename?'
         }
     ];
     var risposta = await inquirer.prompt(questions);
@@ -674,4 +675,41 @@ async function rename(session){
         }
     });
     console.log("File Renamed");
+}
+
+async function move(session){
+    var questions = [
+        {
+            type: 'input',
+            name: 'command',
+            message: 'What file do you want to move?'
+        }
+    ];
+    var risposta = await inquirer.prompt(questions);
+    const oggettoJSON = JSON.stringify(risposta,null,'');
+    var parsedData = JSON.parse(oggettoJSON);
+    var StringID = parsedData.command;
+
+    var browseResult = await session.browse("ns=1;s=" + StringID);
+    if ((browseResult.references).length == 0) {
+        console.log("Error, file does not exists!");
+        return;
+    }
+
+    const methodToCall = [];
+    const nodeID = coerceNodeId("ns=1;s=moveFileObject");
+    methodToCall.push({
+        objectId: coerceNodeId("ns=1;i=1002"),
+        methodId: nodeID,
+        inputArguments: [{
+            dataType: DataType.String,
+            value: StringID
+        }]
+    });
+    session.call(methodToCall,function(err,results){
+        if(err){
+            console.log("Errore:", err);
+        }
+    });
+    console.log("File Moved");
 }

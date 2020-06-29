@@ -398,7 +398,7 @@ function post_initialize() {
                         filename: my_new_data_filename
                     });
                 }
-                else {
+                else if(documents == true){
                     const myFile = fileType.instantiate({
                     nodeId: "s=" + newName,
                     browseName: newName,
@@ -415,6 +415,110 @@ function post_initialize() {
                     outputArguments: []
                 }
             }catch{
+                var callMethodResult = {
+                    statusCode: StatusCodes.Bad,
+                    outputArguments: []
+                }
+            }finally{
+                callback(null,callMethodResult);
+            }
+        });
+
+        const moveFileObject = namespace.addMethod(objectFile,{
+
+            nodeId: "s=moveFileObject",
+            browseName: "moveFileObject",
+                
+            inputArguments:  [
+                {
+                    name:"filename",
+                    description: { text: "specifies the name of the File" },
+                    dataType: opcua.DataType.String        
+                }
+                ],
+                outputArguments: []
+            });
+            
+        moveFileObject.bindMethod((inputArguments,context,callback) =>{
+            try{
+                const fileName = inputArguments[0].value;
+            
+                var documents = false;
+            
+                var my_data_filename;
+            
+                const fileNodeId = new NodeId(NodeIdType.STRING,fileName,1);
+                            
+                var files=fs.readdirSync(startPath);
+                for(var i=0;i<files.length;i++){
+                    var filename=path.join(startPath,files[i]);
+                    var stat = fs.lstatSync(filename);
+                    if (stat.isDirectory()){
+                        var filenames = filename;
+                        var more_files=fs.readdirSync(filenames);
+                        console.log(filenames);
+                        for(var j=0;j<more_files.length;j++){
+                            var filenames=path.join(filenames,more_files[j]);
+                            if (more_files[j] == fileName){
+                                documents = true;
+                                my_data_filename = path.join(__dirname,"./server_files/Documents/" + fileName);
+                                fs.readFile(my_data_filename,'binary', async function(err,binary){
+                                    if (err){
+                                        console.log("Error, file not found");
+                                        return;
+                                    }else{
+                                        promisify(fs.writeFile)("./server_files/" + fileName, binary, "binary");
+                                    }
+                                });
+                                promisify(fs.unlink)(my_data_filename);
+                            }
+                        }
+                    }
+                    else if (files[i] == fileName) {
+                        documents = false;
+                        my_data_filename = path.join(__dirname,"./server_files/" + fileName);
+                        fs.readFile(my_data_filename,'binary', async function(err,binary){
+                            if (err){
+                                console.log("Error, file not found");
+                                return;
+                            }else{
+                                await promisify(fs.writeFile)("./server_files/Documents/" + fileName, binary, "binary");
+                            }
+                        });
+                        promisify(fs.unlink)(my_data_filename);
+                    };
+                };
+            
+                namespace.deleteNode(fileNodeId);
+            
+                if (documents == false){
+                    const myFile = fileType.instantiate({
+                        nodeId: "s=" + fileName,
+                        browseName: fileName,
+                        organizedBy: FileSystem
+                    })
+                        
+                    file_transfer.installFileType(myFile, { 
+                        filename: "./server_files/" + fileName
+                    });
+                }
+                else if(documents == true){
+                    const myFile = fileType.instantiate({
+                    nodeId: "s=" + fileName,
+                    browseName: fileName,
+                    organizedBy: Documents
+                })
+                    
+                    file_transfer.installFileType(myFile, { 
+                        filename: "./server_files/Documents/" + fileName
+                    });
+                }
+            
+                var callMethodResult = {
+                    statusCode: StatusCodes.Good,
+                    outputArguments: []
+                    }
+                }catch{
                 var callMethodResult = {
                     statusCode: StatusCodes.Bad,
                     outputArguments: []

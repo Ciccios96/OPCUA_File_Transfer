@@ -54,7 +54,7 @@ function main() {
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    _c.trys.push([0, 35, , 36]);
+                    _c.trys.push([0, 36, , 37]);
                     question = [
                         {
                             type: 'input',
@@ -180,7 +180,7 @@ function main() {
                     session = _c.sent();
                     _c.label = 13;
                 case 13:
-                    if (!(command != "exit")) return [3 /*break*/, 33];
+                    if (!(command != "exit")) return [3 /*break*/, 34];
                     return [4 /*yield*/, input()];
                 case 14:
                     // user input
@@ -197,50 +197,53 @@ function main() {
                         case "rename": return [3 /*break*/, 28];
                         case "move": return [3 /*break*/, 30];
                     }
-                    return [3 /*break*/, 31];
+                    return [3 /*break*/, 32];
                 case 15: return [4 /*yield*/, browse(session)];
                 case 16:
                     _c.sent();
-                    return [3 /*break*/, 32];
+                    return [3 /*break*/, 33];
                 case 17: return [4 /*yield*/, read_file(session)];
                 case 18:
                     _c.sent();
-                    return [3 /*break*/, 32];
+                    return [3 /*break*/, 33];
                 case 19: return [4 /*yield*/, write_file(session)];
                 case 20:
                     _c.sent();
-                    return [3 /*break*/, 32];
+                    return [3 /*break*/, 33];
                 case 21: return [4 /*yield*/, create_file(session)];
                 case 22:
                     _c.sent();
-                    return [3 /*break*/, 32];
+                    return [3 /*break*/, 33];
                 case 23: return [4 /*yield*/, download(session)];
                 case 24:
                     _c.sent();
-                    return [3 /*break*/, 32];
-                case 25: return [3 /*break*/, 32];
+                    return [3 /*break*/, 33];
+                case 25: return [3 /*break*/, 33];
                 case 26: return [4 /*yield*/, delete_file(session)];
                 case 27:
                     _c.sent();
-                    return [3 /*break*/, 32];
+                    return [3 /*break*/, 33];
                 case 28: return [4 /*yield*/, rename(session)];
                 case 29:
                     _c.sent();
-                    return [3 /*break*/, 32];
-                case 30: return [3 /*break*/, 32];
+                    return [3 /*break*/, 33];
+                case 30: return [4 /*yield*/, move(session)];
                 case 31:
-                    console.log("Wrong Input, retry");
-                    return [3 /*break*/, 32];
-                case 32: return [3 /*break*/, 13];
-                case 33: return [4 /*yield*/, ending(session, client)];
-                case 34:
                     _c.sent();
-                    return [3 /*break*/, 36];
+                    return [3 /*break*/, 33];
+                case 32:
+                    console.log("Wrong Input, retry");
+                    return [3 /*break*/, 33];
+                case 33: return [3 /*break*/, 13];
+                case 34: return [4 /*yield*/, ending(session, client)];
                 case 35:
+                    _c.sent();
+                    return [3 /*break*/, 37];
+                case 36:
                     err_1 = _c.sent();
                     console.log("An error has occured : ", err_1);
-                    return [3 /*break*/, 36];
-                case 36: return [2 /*return*/];
+                    return [3 /*break*/, 37];
+                case 37: return [2 /*return*/];
             }
         });
     });
@@ -748,7 +751,7 @@ function input() {
                             type: 'rawlist',
                             name: 'command',
                             message: 'Avaiable Commands:',
-                            choices: ["browse", "read", "write", "upload", "download", "delete", "rename", "exit"]
+                            choices: ["browse", "read", "write", "upload", "download", "delete", "rename", "move", "exit"]
                         }
                     ];
                     return [4 /*yield*/, inquirer.prompt(questions)];
@@ -873,7 +876,7 @@ function rename(session) {
                         {
                             type: 'input',
                             name: 'command',
-                            message: 'What node do you want to rename?'
+                            message: 'What file do you want to rename?'
                         }
                     ];
                     return [4 /*yield*/, inquirer.prompt(questions)];
@@ -928,6 +931,53 @@ function rename(session) {
                         }
                     });
                     console.log("File Renamed");
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function move(session) {
+    return __awaiter(this, void 0, void 0, function () {
+        var questions, risposta, oggettoJSON, parsedData, StringID, browseResult, methodToCall, nodeID;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    questions = [
+                        {
+                            type: 'input',
+                            name: 'command',
+                            message: 'What file do you want to move?'
+                        }
+                    ];
+                    return [4 /*yield*/, inquirer.prompt(questions)];
+                case 1:
+                    risposta = _a.sent();
+                    oggettoJSON = JSON.stringify(risposta, null, '');
+                    parsedData = JSON.parse(oggettoJSON);
+                    StringID = parsedData.command;
+                    return [4 /*yield*/, session.browse("ns=1;s=" + StringID)];
+                case 2:
+                    browseResult = _a.sent();
+                    if ((browseResult.references).length == 0) {
+                        console.log("Error, file does not exists!");
+                        return [2 /*return*/];
+                    }
+                    methodToCall = [];
+                    nodeID = node_opcua_1.coerceNodeId("ns=1;s=moveFileObject");
+                    methodToCall.push({
+                        objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
+                        methodId: nodeID,
+                        inputArguments: [{
+                                dataType: node_opcua_1.DataType.String,
+                                value: StringID
+                            }]
+                    });
+                    session.call(methodToCall, function (err, results) {
+                        if (err) {
+                            console.log("Errore:", err);
+                        }
+                    });
+                    console.log("File Moved");
                     return [2 /*return*/];
             }
         });
