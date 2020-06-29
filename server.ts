@@ -60,8 +60,8 @@ function post_initialize() {
         //creazione metodo createFileObject
         const method = namespace.addMethod(objectFile,{
 
-            nodeId: "s=createFileObjecttxt",
-            browseName: "createFileObjecttxt",
+            nodeId: "s=createFileObjectTxt",
+            browseName: "createFileObjectTxt",
         
             inputArguments:  [
                 {
@@ -220,8 +220,8 @@ function post_initialize() {
 
         const method3 = namespace.addMethod(objectFile,{
             
-            nodeId: "s=createFileObjectpdf",
-            browseName: "createFileObjectpdf",
+            nodeId: "s=createFileObject",
+            browseName: "createFileObject",
         
             inputArguments:  [
                 {

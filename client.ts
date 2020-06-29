@@ -142,7 +142,7 @@ async function main() {
                 await write_file(session);
                 break;
             case "upload":
-                await call_method(session);
+                await create_file(session);
                 break;
             case "download":
                 await download(session);
@@ -242,35 +242,35 @@ async function read_file(session){
             choices: ["yes","no"]
         }
     ];
-    while(risposta != "yes" && risposta != "no"){
-        var risposta = await inquirer.prompt(question);
-        const oggettoJSON = JSON.stringify(risposta,null,'');
-        var parsedData = JSON.parse(oggettoJSON);
-        var risposta = parsedData.command;
-        switch(risposta){
-            case "yes":
-                if(extention == ".txt")
-                    download_file(data,StringID);
-                else if (extention == ".pdf")
-                    download_PDF(data,StringID);
-                break;
-            case "no":
-                console.log("I will return to the Main Menu");
-                break;
-            default:
-                console.log("Wrong Input");
-                break;
-        }
+    
+    var risposta = await inquirer.prompt(question);
+    const oggettoJSON2 = JSON.stringify(risposta,null,'');
+    var parsedData = JSON.parse(oggettoJSON2);
+    var risposta = parsedData.command;
+    switch(risposta){
+        case "yes":
+            if(extention == ".txt")
+                download_file_txt(data,StringID);
+            else
+                download_file(data,StringID);
+            break;
+        case "no":
+            console.log("I will return to the Main Menu");
+            break;
+        default:
+            console.log("Wrong Input");
+            break;
     }
+    
     console.log("Operation Succesful");
 }
 
-async function download_file(data,StringID){
+async function download_file_txt(data,StringID){
     const my_data_filename = "./downloads/" + StringID;
     await promisify(fs.writeFile)(my_data_filename, data.toString("utf-8"), "utf8");
 }
 
-async function download_PDF(data,StringID){
+async function download_file(data,StringID){
     const my_data_filename = "./downloads/" + StringID;
     await promisify(fs.writeFile)(my_data_filename, data, "binary");
 }
@@ -352,7 +352,7 @@ async function ending(session,client){
     console.log("Exited");
 }
 
-async function call_method(session) {
+async function create_file(session) {
     var override = false;
     var questions = [
         {
@@ -373,16 +373,6 @@ async function call_method(session) {
     var name = parsedData.command;
     var yn = parsedData.command2;
 
-    if (path.extname(name) != ".txt" && path.extname(name) != ".pdf"){
-        console.log("Sorry, Can't create a non txt or pdf File");
-        return;
-    }
-
-    if(yn != "yes" && yn != "no"){
-        console.log("Sorry, bad input on yes or no");
-        return;
-    }
-
     var browseResult = await session.browse("ns=1;s=" + name);
     if ((browseResult.references).length > 0) {
         var override_question = [
@@ -396,18 +386,34 @@ async function call_method(session) {
         var risposta = await inquirer.prompt(override_question);
         var oggettoJSON = JSON.stringify(risposta,null,'');
         var parsedData = JSON.parse(oggettoJSON);
-        if (parsedData.command == "yes"){
+        var yn_override = parsedData.command;
+        if (yn_override == "yes"){
             override = true;
-        }else if (parsedData.command == "no"){
+        } else 
             return;
-        }
     }
 
-    if(path.extname(name) == ".txt"){
-        if(override == false){
-            const methodsToCall = [];
-            const nodeID = coerceNodeId("ns=1;s=createFileObjecttxt");
-            methodsToCall.push({
+    if(override == false){
+        var question = [
+            {
+                type: 'input',
+                name: 'command',
+                message: 'Please write the path for the file'
+            }
+        ];
+        var risposta = await inquirer.prompt(question);
+        oggettoJSON = JSON.stringify(risposta,null,'');
+        var parsedData = JSON.parse(oggettoJSON);
+        var dato = parsedData.command;
+
+        fs.readFile(dato,'binary', async function(err,binary){
+            if (err){
+                console.log("Error, file not found");
+                return;
+            }else{
+                const methodsToCall = [];
+                const nodeID = coerceNodeId("ns=1;s=createFileObject");
+                methodsToCall.push({
                 objectId: coerceNodeId("ns=1;i=1002"),
                 methodId: nodeID,
                 inputArguments: [{
@@ -415,132 +421,65 @@ async function call_method(session) {
                     value: name
                 },{
                     dataType: DataType.String,
-                    value:yn
+                    value: yn
+                },{
+                    dataType: DataType.String,
+                    value: binary
                 }]
-            });
-            session.call(methodsToCall, function(err,results){
-               if (err){
-                   console.log(err);
-                   return;
-               }
-               else{
-                   null;
-               }
-            });
-            console.log("I have called the method: " + nodeID);
-        }
-
-        const fileNodeId = new NodeId(NodeIdType.STRING, name, 1);
-        const clientFile = new ClientFile(session, fileNodeId);
-        const mode = OpenFileMode.Write;
+                });
+                session.call(methodsToCall, function(err,results){
+                if (err){
+                    console.log(err);
+                    return;
+                }
+                });
+                const fileNodeId = new NodeId(NodeIdType.STRING, name, 1);
+                const clientFile = new ClientFile(session, fileNodeId);
+                const mode = OpenFileMode.WriteAppend;
     
-        await clientFile.open(mode);
-
+                await clientFile.open(mode);
+                const dataToWrite = Buffer.from(' ');
+                await clientFile.write(dataToWrite);
+            }
+        });
+    }
+    else {
+        const methodToCall = [];
+        const nodeID = coerceNodeId("ns=1;s=deleteFileObject");
+        methodToCall.push({
+            objectId: coerceNodeId("ns=1;i=1002"),
+            methodId: nodeID,
+            inputArguments: [{
+                dataType: DataType.String,
+                value: name
+            }]
+        });
+        session.call(methodToCall,function(err,results){
+            if(err){
+                console.log("Errore:", err);
+                return;
+            }
+        });
         var question = [
-           {
+            {
                 type: 'input',
                 name: 'command',
-                message: 'What do you want to write in this node?'
+                message: 'Please write the path for the file'
             }
         ];
         var risposta = await inquirer.prompt(question);
         oggettoJSON = JSON.stringify(risposta,null,'');
         var parsedData = JSON.parse(oggettoJSON);
         var dato = parsedData.command;
-        
-        const dataToWrite = Buffer.from(dato);
-        await clientFile.write(dataToWrite);
-    }
 
-    if(path.extname(name) == ".pdf"){
-        if(override == false){
-            var question = [
-                {
-                     type: 'input',
-                     name: 'command',
-                     message: 'Please write the path for the .pdf file'
-                 }
-             ];
-             var risposta = await inquirer.prompt(question);
-             oggettoJSON = JSON.stringify(risposta,null,'');
-             var parsedData = JSON.parse(oggettoJSON);
-             var dato = parsedData.command;
-
-            fs.readFile(dato,'binary',function(err,binary){
-                if (err){
-                    console.log("Error, file not found");
-                    return;
-                }else{
-                    const methodsToCall = [];
-                    const nodeID = coerceNodeId("ns=1;s=createFileObjectpdf");
-                    methodsToCall.push({
-                    objectId: coerceNodeId("ns=1;i=1002"),
-                    methodId: nodeID,
-                    inputArguments: [{
-                        dataType: DataType.String,
-                        value: name
-                    },{
-                        dataType: DataType.String,
-                        value:yn
-                    },{
-                        dataType: DataType.String,
-                        value:binary
-                    }]
-                    });
-                    session.call(methodsToCall, function(err,results){
-                    if (err){
-                       console.log(err);
-                       return;
-                    }
-                    else{
-                       null;
-                    }
-                    });
-                }
-            });
-        }
-        
-
-        else if (override == true){
-            const methodToCall = [];
-            const nodeID = coerceNodeId("ns=1;s=deleteFileObject");
-            methodToCall.push({
-                objectId: coerceNodeId("ns=1;i=1002"),
-                methodId: nodeID,
-                inputArguments: [{
-                    dataType: DataType.String,
-                    value: name
-                }]
-            });
-            session.call(methodToCall,function(err,results){
-                if(err){
-                    console.log("Errore:", err);
-                    return;
-                }
-                else{
-                    null;
-                }
-            });
-            var question = [
-                {
-                     type: 'input',
-                     name: 'command',
-                     message: 'Please write the path for the .pdf file'
-                 }
-             ];
-             var risposta = await inquirer.prompt(question);
-             oggettoJSON = JSON.stringify(risposta,null,'');
-             var parsedData = JSON.parse(oggettoJSON);
-             var dato = parsedData.command;
-
-            fs.readFile(dato,'binary',function(err,binary){
-                if (err){
-                    console.log("Error, file not found");
-                    return;
-                }else{
-                    const methodsToCall = [];
-                    const nodeID2 = coerceNodeId("ns=1;s=createFileObjectpdf");
-                    methodsToCall.push({
+        fs.readFile(dato,'binary', async function(err,binary){
+            if (err){
+                console.log("Error, file not found");
+                return;
+            } else {
+                const methodsToCall = [];
+                const nodeID2 = coerceNodeId("ns=1;s=createFileObject");
+                methodsToCall.push({
                     objectId: coerceNodeId("ns=1;i=1002"),
                     methodId: nodeID2,
                     inputArguments: [{
@@ -553,21 +492,23 @@ async function call_method(session) {
                         dataType: DataType.String,
                         value:binary
                     }]
-                    });
-                    session.call(methodsToCall, function(err,results){
+                });
+                session.call(methodsToCall, function(err,results){
                     if (err){
-                       console.log(err);
-                       return;
+                        console.log(err);
+                        return;
                     }
-                    else{
-                       null;
-                    }
-                    });
-                }
-            });
-        }
-        }
-    console.log("Operation Succesful");
+                });
+                const fileNodeId = new NodeId(NodeIdType.STRING, name, 1);
+                const clientFile = new ClientFile(session, fileNodeId);
+                const mode = OpenFileMode.WriteAppend;
+    
+                await clientFile.open(mode);
+                const dataToWrite = Buffer.from(' ');
+                await clientFile.write(dataToWrite);
+            }
+        });
+    }
 }
 
 async function input(){
@@ -619,10 +560,10 @@ async function download(session){
     const data: Buffer = await clientFile.read(byte);
 
     if(extention == ".txt"){
-    download_file(data,StringID);
+        download_file_txt(data,StringID);
     }
-    else if (extention == ".pdf"){
-    download_PDF(data,StringID);
+    else {
+        download_file(data,StringID);
     }
     console.log("File Downloaded");
 }
@@ -660,8 +601,6 @@ async function delete_file(session){
         if(err){
             console.log("Errore:", err);
         }
-        else{
-            console.log("File Eliminated");
-        }
     });
+    console.log("File Eliminated");
 }
