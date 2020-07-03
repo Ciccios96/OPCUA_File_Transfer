@@ -356,11 +356,12 @@ function read_file(session) {
                 case 6:
                     data = _a.sent();
                     if (extension == ".txt") {
-                        console.log("File data: ", data.toString("utf-8"));
+                        console.log("File data:\n", data.toString("utf-8"));
                     }
                     else {
-                        console.log("Can't read binary file of a PDF");
+                        console.log("Can't read binary file of a non txt file!");
                     }
+                    console.log("File size:", humanFileSize(byte));
                     question = [
                         {
                             type: 'rawlist',
@@ -959,4 +960,22 @@ function move(session) {
             }
         });
     });
+}
+function humanFileSize(bytes, si, dp) {
+    if (si === void 0) { si = true; }
+    if (dp === void 0) { dp = 1; }
+    var thresh = si ? 1000 : 1024;
+    if (Math.abs(bytes) < thresh) {
+        return bytes + ' B';
+    }
+    var units = si
+        ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+        : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+    var u = -1;
+    var r = Math.pow(10, dp);
+    do {
+        bytes /= thresh;
+        ++u;
+    } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+    return bytes.toFixed(dp) + ' ' + units[u];
 }
