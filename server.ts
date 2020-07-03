@@ -423,7 +423,7 @@ function post_initialize() {
                 callback(null,callMethodResult);
             }
         });
-
+        //creazione metodo moveFileObject
         const moveFileObject = namespace.addMethod(objectFile,{
 
             nodeId: "s=moveFileObject",

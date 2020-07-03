@@ -364,7 +364,7 @@ async function create_file(session) {
         {
             type: 'input',
             name: 'command',
-            message: 'Name the new file node'
+            message: 'Please write the path for the file to upload'
         },
         {
             type: 'rawlist',
@@ -376,16 +376,19 @@ async function create_file(session) {
     var risposta = await inquirer.prompt(questions);
     var oggettoJSON = JSON.stringify(risposta,null,'');
     var parsedData = JSON.parse(oggettoJSON);
-    var name = parsedData.command;
+    var percs = parsedData.command;
     var yn = parsedData.command2;
-    var extension = path.extname(name);
 
-    if(! /\.(jpe?g|png|gif|bmp|docx|pdf|txt|pptx)$/i.test(name + extension)){
+    var dato=path.basename(percs);
+    console.log("the file is " + dato);
+    var extension = path.extname(dato);
+
+    if(! /\.(jpe?g|png|gif|bmp|docx|pdf|txt|pptx)$/i.test(dato + extension)){
         console.log("This file is not supported");
         return
     }
 
-    var browseResult = await session.browse("ns=1;s=" + name);
+    var browseResult = await session.browse("ns=1;s=" + dato);
     if ((browseResult.references).length > 0) {
         var override_question = [
             {
@@ -406,19 +409,7 @@ async function create_file(session) {
     }
 
     if(override == false){
-        var question = [
-            {
-                type: 'input',
-                name: 'command',
-                message: 'Please write the path for the file'
-            }
-        ];
-        var risposta = await inquirer.prompt(question);
-        oggettoJSON = JSON.stringify(risposta,null,'');
-        var parsedData = JSON.parse(oggettoJSON);
-        var dato = parsedData.command;
-
-        fs.readFile(dato,'binary', async function(err,binary){
+        fs.readFile(percs,'binary', async function(err,binary){
             if (err){
                 console.log("Error, file not found");
                 return;
@@ -430,7 +421,7 @@ async function create_file(session) {
                 methodId: nodeID,
                 inputArguments: [{
                     dataType: DataType.String,
-                    value: name
+                    value: dato
                 },{
                     dataType: DataType.String,
                     value: yn
@@ -445,7 +436,7 @@ async function create_file(session) {
                     return;
                 }
                 });
-                const fileNodeId = new NodeId(NodeIdType.STRING, name, 1);
+                const fileNodeId = new NodeId(NodeIdType.STRING, dato, 1);
                 const clientFile = new ClientFile(session, fileNodeId);
                 const mode = OpenFileMode.WriteAppend;
     
@@ -463,7 +454,7 @@ async function create_file(session) {
             methodId: nodeID,
             inputArguments: [{
                 dataType: DataType.String,
-                value: name
+                value: dato
             }]
         });
         session.call(methodToCall,function(err,results){
@@ -472,19 +463,7 @@ async function create_file(session) {
                 return;
             }
         });
-        var question = [
-            {
-                type: 'input',
-                name: 'command',
-                message: 'Please write the path for the file'
-            }
-        ];
-        var risposta = await inquirer.prompt(question);
-        oggettoJSON = JSON.stringify(risposta,null,'');
-        var parsedData = JSON.parse(oggettoJSON);
-        var dato = parsedData.command;
-
-        fs.readFile(dato,'binary', async function(err,binary){
+        fs.readFile(percs,'binary', async function(err,binary){
             if (err){
                 console.log("Error, file not found");
                 return;
@@ -496,7 +475,7 @@ async function create_file(session) {
                     methodId: nodeID2,
                     inputArguments: [{
                         dataType: DataType.String,
-                        value: name
+                        value: dato
                     },{
                         dataType: DataType.String,
                         value:yn
@@ -511,7 +490,7 @@ async function create_file(session) {
                         return;
                     }
                 });
-                const fileNodeId = new NodeId(NodeIdType.STRING, name, 1);
+                const fileNodeId = new NodeId(NodeIdType.STRING, dato, 1);
                 const clientFile = new ClientFile(session, fileNodeId);
                 const mode = OpenFileMode.WriteAppend;
     
@@ -521,6 +500,7 @@ async function create_file(session) {
             }
         });
     }
+    console.log("File Uploaded");
 }
 
 async function input(){

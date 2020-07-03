@@ -538,7 +538,7 @@ function ending(session, client) {
 }
 function create_file(session) {
     return __awaiter(this, void 0, void 0, function () {
-        var override, questions, risposta, oggettoJSON, parsedData, name, yn, extension, browseResult, override_question, risposta, oggettoJSON, parsedData, yn_override, question, risposta, parsedData, dato, methodToCall, nodeID, question, risposta, parsedData, dato;
+        var override, questions, risposta, oggettoJSON, parsedData, percs, yn, dato, extension, browseResult, override_question, risposta, oggettoJSON, parsedData, yn_override, methodToCall, nodeID;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -547,7 +547,7 @@ function create_file(session) {
                         {
                             type: 'input',
                             name: 'command',
-                            message: 'Name the new file node'
+                            message: 'Please write the path for the file to upload'
                         },
                         {
                             type: 'rawlist',
@@ -561,14 +561,16 @@ function create_file(session) {
                     risposta = _a.sent();
                     oggettoJSON = JSON.stringify(risposta, null, '');
                     parsedData = JSON.parse(oggettoJSON);
-                    name = parsedData.command;
+                    percs = parsedData.command;
                     yn = parsedData.command2;
-                    extension = path.extname(name);
-                    if (!/\.(jpe?g|png|gif|bmp|docx|pdf|txt|pptx)$/i.test(name + extension)) {
+                    dato = path.basename(percs);
+                    console.log("the file is " + dato);
+                    extension = path.extname(dato);
+                    if (!/\.(jpe?g|png|gif|bmp|docx|pdf|txt|pptx)$/i.test(dato + extension)) {
                         console.log("This file is not supported");
                         return [2 /*return*/];
                     }
-                    return [4 /*yield*/, session.browse("ns=1;s=" + name)];
+                    return [4 /*yield*/, session.browse("ns=1;s=" + dato)];
                 case 2:
                     browseResult = _a.sent();
                     if (!((browseResult.references).length > 0)) return [3 /*break*/, 4];
@@ -593,149 +595,124 @@ function create_file(session) {
                         return [2 /*return*/];
                     _a.label = 4;
                 case 4:
-                    if (!(override == false)) return [3 /*break*/, 6];
-                    question = [
-                        {
-                            type: 'input',
-                            name: 'command',
-                            message: 'Please write the path for the file'
-                        }
-                    ];
-                    return [4 /*yield*/, inquirer.prompt(question)];
-                case 5:
-                    risposta = _a.sent();
-                    oggettoJSON = JSON.stringify(risposta, null, '');
-                    parsedData = JSON.parse(oggettoJSON);
-                    dato = parsedData.command;
-                    fs.readFile(dato, 'binary', function (err, binary) {
-                        return __awaiter(this, void 0, void 0, function () {
-                            var methodsToCall, nodeID, fileNodeId, clientFile, mode, dataToWrite;
-                            return __generator(this, function (_a) {
-                                switch (_a.label) {
-                                    case 0:
-                                        if (!err) return [3 /*break*/, 1];
-                                        console.log("Error, file not found");
-                                        return [2 /*return*/];
-                                    case 1:
-                                        methodsToCall = [];
-                                        nodeID = node_opcua_1.coerceNodeId("ns=1;s=createFileObject");
-                                        methodsToCall.push({
-                                            objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
-                                            methodId: nodeID,
-                                            inputArguments: [{
-                                                    dataType: node_opcua_1.DataType.String,
-                                                    value: name
-                                                }, {
-                                                    dataType: node_opcua_1.DataType.String,
-                                                    value: yn
-                                                }, {
-                                                    dataType: node_opcua_1.DataType.String,
-                                                    value: binary
-                                                }]
-                                        });
-                                        session.call(methodsToCall, function (err, results) {
-                                            if (err) {
-                                                console.log(err);
-                                                return;
-                                            }
-                                        });
-                                        fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, name, 1);
-                                        clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
-                                        mode = node_opcua_file_transfer_1.OpenFileMode.WriteAppend;
-                                        return [4 /*yield*/, clientFile.open(mode)];
-                                    case 2:
-                                        _a.sent();
-                                        dataToWrite = Buffer.from(' ');
-                                        return [4 /*yield*/, clientFile.write(dataToWrite)];
-                                    case 3:
-                                        _a.sent();
-                                        _a.label = 4;
-                                    case 4: return [2 /*return*/];
-                                }
+                    if (override == false) {
+                        fs.readFile(percs, 'binary', function (err, binary) {
+                            return __awaiter(this, void 0, void 0, function () {
+                                var methodsToCall, nodeID, fileNodeId, clientFile, mode, dataToWrite;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            if (!err) return [3 /*break*/, 1];
+                                            console.log("Error, file not found");
+                                            return [2 /*return*/];
+                                        case 1:
+                                            methodsToCall = [];
+                                            nodeID = node_opcua_1.coerceNodeId("ns=1;s=createFileObject");
+                                            methodsToCall.push({
+                                                objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
+                                                methodId: nodeID,
+                                                inputArguments: [{
+                                                        dataType: node_opcua_1.DataType.String,
+                                                        value: dato
+                                                    }, {
+                                                        dataType: node_opcua_1.DataType.String,
+                                                        value: yn
+                                                    }, {
+                                                        dataType: node_opcua_1.DataType.String,
+                                                        value: binary
+                                                    }]
+                                            });
+                                            session.call(methodsToCall, function (err, results) {
+                                                if (err) {
+                                                    console.log(err);
+                                                    return;
+                                                }
+                                            });
+                                            fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, dato, 1);
+                                            clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
+                                            mode = node_opcua_file_transfer_1.OpenFileMode.WriteAppend;
+                                            return [4 /*yield*/, clientFile.open(mode)];
+                                        case 2:
+                                            _a.sent();
+                                            dataToWrite = Buffer.from(' ');
+                                            return [4 /*yield*/, clientFile.write(dataToWrite)];
+                                        case 3:
+                                            _a.sent();
+                                            _a.label = 4;
+                                        case 4: return [2 /*return*/];
+                                    }
+                                });
                             });
                         });
-                    });
-                    return [3 /*break*/, 8];
-                case 6:
-                    methodToCall = [];
-                    nodeID = node_opcua_1.coerceNodeId("ns=1;s=deleteFileObject");
-                    methodToCall.push({
-                        objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
-                        methodId: nodeID,
-                        inputArguments: [{
-                                dataType: node_opcua_1.DataType.String,
-                                value: name
-                            }]
-                    });
-                    session.call(methodToCall, function (err, results) {
-                        if (err) {
-                            console.log("Errore:", err);
-                            return;
-                        }
-                    });
-                    question = [
-                        {
-                            type: 'input',
-                            name: 'command',
-                            message: 'Please write the path for the file'
-                        }
-                    ];
-                    return [4 /*yield*/, inquirer.prompt(question)];
-                case 7:
-                    risposta = _a.sent();
-                    oggettoJSON = JSON.stringify(risposta, null, '');
-                    parsedData = JSON.parse(oggettoJSON);
-                    dato = parsedData.command;
-                    fs.readFile(dato, 'binary', function (err, binary) {
-                        return __awaiter(this, void 0, void 0, function () {
-                            var methodsToCall, nodeID2, fileNodeId, clientFile, mode, dataToWrite;
-                            return __generator(this, function (_a) {
-                                switch (_a.label) {
-                                    case 0:
-                                        if (!err) return [3 /*break*/, 1];
-                                        console.log("Error, file not found");
-                                        return [2 /*return*/];
-                                    case 1:
-                                        methodsToCall = [];
-                                        nodeID2 = node_opcua_1.coerceNodeId("ns=1;s=createFileObject");
-                                        methodsToCall.push({
-                                            objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
-                                            methodId: nodeID2,
-                                            inputArguments: [{
-                                                    dataType: node_opcua_1.DataType.String,
-                                                    value: name
-                                                }, {
-                                                    dataType: node_opcua_1.DataType.String,
-                                                    value: yn
-                                                }, {
-                                                    dataType: node_opcua_1.DataType.String,
-                                                    value: binary
-                                                }]
-                                        });
-                                        session.call(methodsToCall, function (err, results) {
-                                            if (err) {
-                                                console.log(err);
-                                                return;
-                                            }
-                                        });
-                                        fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, name, 1);
-                                        clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
-                                        mode = node_opcua_file_transfer_1.OpenFileMode.WriteAppend;
-                                        return [4 /*yield*/, clientFile.open(mode)];
-                                    case 2:
-                                        _a.sent();
-                                        dataToWrite = Buffer.from(' ');
-                                        return [4 /*yield*/, clientFile.write(dataToWrite)];
-                                    case 3:
-                                        _a.sent();
-                                        _a.label = 4;
-                                    case 4: return [2 /*return*/];
-                                }
+                    }
+                    else {
+                        methodToCall = [];
+                        nodeID = node_opcua_1.coerceNodeId("ns=1;s=deleteFileObject");
+                        methodToCall.push({
+                            objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
+                            methodId: nodeID,
+                            inputArguments: [{
+                                    dataType: node_opcua_1.DataType.String,
+                                    value: dato
+                                }]
+                        });
+                        session.call(methodToCall, function (err, results) {
+                            if (err) {
+                                console.log("Errore:", err);
+                                return;
+                            }
+                        });
+                        fs.readFile(percs, 'binary', function (err, binary) {
+                            return __awaiter(this, void 0, void 0, function () {
+                                var methodsToCall, nodeID2, fileNodeId, clientFile, mode, dataToWrite;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            if (!err) return [3 /*break*/, 1];
+                                            console.log("Error, file not found");
+                                            return [2 /*return*/];
+                                        case 1:
+                                            methodsToCall = [];
+                                            nodeID2 = node_opcua_1.coerceNodeId("ns=1;s=createFileObject");
+                                            methodsToCall.push({
+                                                objectId: node_opcua_1.coerceNodeId("ns=1;i=1002"),
+                                                methodId: nodeID2,
+                                                inputArguments: [{
+                                                        dataType: node_opcua_1.DataType.String,
+                                                        value: dato
+                                                    }, {
+                                                        dataType: node_opcua_1.DataType.String,
+                                                        value: yn
+                                                    }, {
+                                                        dataType: node_opcua_1.DataType.String,
+                                                        value: binary
+                                                    }]
+                                            });
+                                            session.call(methodsToCall, function (err, results) {
+                                                if (err) {
+                                                    console.log(err);
+                                                    return;
+                                                }
+                                            });
+                                            fileNodeId = new node_opcua_1.NodeId(node_opcua_1.NodeIdType.STRING, dato, 1);
+                                            clientFile = new node_opcua_file_transfer_1.ClientFile(session, fileNodeId);
+                                            mode = node_opcua_file_transfer_1.OpenFileMode.WriteAppend;
+                                            return [4 /*yield*/, clientFile.open(mode)];
+                                        case 2:
+                                            _a.sent();
+                                            dataToWrite = Buffer.from(' ');
+                                            return [4 /*yield*/, clientFile.write(dataToWrite)];
+                                        case 3:
+                                            _a.sent();
+                                            _a.label = 4;
+                                        case 4: return [2 /*return*/];
+                                    }
+                                });
                             });
                         });
-                    });
-                    _a.label = 8;
-                case 8: return [2 /*return*/];
+                    }
+                    console.log("File Uploaded");
+                    return [2 /*return*/];
             }
         });
     });
