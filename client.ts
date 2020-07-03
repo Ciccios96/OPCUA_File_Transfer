@@ -236,10 +236,11 @@ async function read_file(session){
     await clientFile.setPosition(0);
     const data: Buffer = await clientFile.read(byte);
     if(extension == ".txt"){
-        console.log("File data: ", data.toString("utf-8"));
+        console.log("File data:\n", data.toString("utf-8"));
     }else{
-        console.log("Can't read binary file of a PDF");
+        console.log("Can't read binary file of a non txt file!");
     }
+    console.log("File size:", bytes, "bytes");
     var question = [
         {
             type: 'rawlist',
