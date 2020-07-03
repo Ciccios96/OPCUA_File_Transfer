@@ -491,7 +491,7 @@ function post_initialize() {
             
                 namespace.deleteNode(fileNodeId);
             
-                if (documents == false){
+                if (documents == true){
                     const myFile = fileType.instantiate({
                         nodeId: "s=" + fileName,
                         browseName: fileName,
@@ -502,7 +502,7 @@ function post_initialize() {
                         filename: "./server_files/Documents/" + fileName
                     });
                 }
-                else if(documents == true){
+                else if(documents == false){
                     const myFile = fileType.instantiate({
                     nodeId: "s=" + fileName,
                     browseName: fileName,

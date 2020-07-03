@@ -484,7 +484,7 @@ function post_initialize() {
                 }
                 ;
                 namespace.deleteNode(fileNodeId);
-                if (documents == false) {
+                if (documents == true) {
                     var myFile = fileType.instantiate({
                         nodeId: "s=" + fileName_1,
                         browseName: fileName_1,
@@ -494,7 +494,7 @@ function post_initialize() {
                         filename: "./server_files/Documents/" + fileName_1
                     });
                 }
-                else if (documents == true) {
+                else if (documents == false) {
                     var myFile = fileType.instantiate({
                         nodeId: "s=" + fileName_1,
                         browseName: fileName_1,
