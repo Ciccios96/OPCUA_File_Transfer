@@ -384,7 +384,7 @@ async function create_file(session) {
     console.log("the file is " + dato);
     var extension = path.extname(dato);
 
-    if(! /\.(jpe?g|png|gif|bmp|docx|pdf|txt|pptx)$/i.test(dato + extension)){
+    if(! /\.(jpe?g|png|gif|bmp|docx|pdf|txt|pptx|doc|html|odt|xls|xlsx|ods|ppt)$/i.test(dato + extension)){
         console.log("This file is not supported");
         return
     }
