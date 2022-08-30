@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "inquirer": "^7.1.0",
-    "node-opcua": "^2.5.12",
+    "node-opcua": "^2.74.0",
     "node-opcua-file-transfer": "^2.5.12",
     "pdfkit": "^0.11.0",
     "promptly": "^3.0.3"
